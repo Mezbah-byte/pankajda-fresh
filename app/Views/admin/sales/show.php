@@ -1,10 +1,14 @@
 <?= $this->extend('layouts/admin') ?>
 <?= $this->section('content') ?>
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="mz-page-header d-flex align-items-center justify-content-between">
     <div>
-        <h4 class="m-0 fw-bold">Invoice <?= esc($sale['invoice_no']) ?></h4>
-        <p class="text-muted small m-0"><?= esc($sale['sale_date']) ?> &middot; <?= esc(ucfirst($sale['sale_type'])) ?> sale</p>
+        <h4>Invoice <?= esc($sale['invoice_no']) ?></h4>
+        <ul class="mz-breadcrumb">
+            <li>Business</li>
+            <li><a href="<?= site_url('admin/sales') ?>" class="text-muted text-decoration-none">Sales</a></li>
+            <li><?= esc($sale['invoice_no']) ?></li>
+        </ul>
     </div>
     <div class="d-flex gap-2">
         <a href="<?= site_url('admin/sales/' . $sale['un_id'] . '/invoice') ?>" target="_blank" class="btn btn-light"><i class="bi bi-printer me-2"></i>Print</a>
@@ -15,18 +19,23 @@
 <div class="row g-3">
     <div class="col-md-8">
         <div class="pd-card">
-            <div class="d-flex justify-content-between mb-3">
+            <div class="d-flex justify-content-between mb-4">
                 <div>
-                    <h6 class="fw-bold mb-1">Customer</h6>
-                    <div class="fw-semibold"><?= esc($customer['customer_name'] ?? '-') ?></div>
-                    <div class="small text-muted"><?= esc($customer['phone'] ?? '') ?></div>
+                    <div class="text-muted" style="font-size:.72rem;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Customer</div>
+                    <div class="fw-bold"><?= esc($customer['customer_name'] ?? '-') ?></div>
+                    <div class="text-muted" style="font-size:.82rem;"><?= esc($customer['phone'] ?? '') ?></div>
                 </div>
                 <?php if (! empty($company)): ?>
                     <div class="text-end">
-                        <h6 class="fw-bold mb-1">Company</h6>
-                        <div><?= esc($company['company_name']) ?></div>
+                        <div class="text-muted" style="font-size:.72rem;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Company</div>
+                        <div class="fw-semibold"><?= esc($company['company_name']) ?></div>
                     </div>
                 <?php endif; ?>
+                <div class="text-end">
+                    <div class="text-muted" style="font-size:.72rem;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Date</div>
+                    <div class="fw-semibold"><?= esc($sale['sale_date']) ?></div>
+                    <span class="badge-secondary-soft"><?= esc(ucfirst($sale['sale_type'])) ?></span>
+                </div>
             </div>
 
             <div class="table-responsive">
@@ -47,12 +56,12 @@
             </div>
 
             <?php if (! empty($sale['notes'])): ?>
-                <p class="text-muted small mt-3 mb-0"><strong>Notes:</strong> <?= esc($sale['notes']) ?></p>
+                <p class="text-muted mt-3 mb-0" style="font-size:.82rem;"><strong>Notes:</strong> <?= esc($sale['notes']) ?></p>
             <?php endif; ?>
         </div>
 
         <div class="pd-card">
-            <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-4">
                 <h6 class="fw-bold m-0">Payment History</h6>
                 <?php if ((float) $sale['due_amount'] > 0): ?>
                     <button class="btn btn-sm btn-primary" data-bs-toggle="collapse" data-bs-target="#addSalePay"><i class="bi bi-plus-circle me-1"></i>Add Payment</button>
@@ -61,7 +70,7 @@
 
             <?php if ((float) $sale['due_amount'] > 0): ?>
                 <div class="collapse" id="addSalePay">
-                    <form method="post" action="<?= site_url('admin/sales/' . $sale['un_id'] . '/payments') ?>" class="border rounded p-3 mb-3" style="background:#f7f8fc;">
+                    <form method="post" action="<?= site_url('admin/sales/' . $sale['un_id'] . '/payments') ?>" class="collapse-panel mb-4">
                         <?= csrf_field() ?>
                         <div class="row g-2">
                             <div class="col-md-3"><input type="number" step="0.01" name="amount" class="form-control" placeholder="Amount" max="<?= esc($sale['due_amount']) ?>" required></div>
@@ -87,13 +96,13 @@
                     <?php foreach (($sale['payments'] ?? []) as $p): ?>
                         <tr>
                             <td><?= esc($p['payment_date']) ?></td>
-                            <td><span class="badge bg-light text-dark"><?= esc($p['payment_method']) ?></span></td>
+                            <td><span class="badge-secondary-soft"><?= esc($p['payment_method']) ?></span></td>
                             <td><?= esc($p['reference_no'] ?? '-') ?></td>
-                            <td class="text-end fw-semibold text-success">৳ <?= number_format((float) $p['amount'], 2) ?></td>
+                            <td class="text-end fw-semibold" style="color:#02a98f;">৳ <?= number_format((float) $p['amount'], 2) ?></td>
                         </tr>
                     <?php endforeach; ?>
                     <?php if (empty($sale['payments'])): ?>
-                        <tr><td colspan="4" class="text-center text-muted py-3">No payments yet.</td></tr>
+                        <tr><td colspan="4" class="text-center text-muted py-4">No payments yet.</td></tr>
                     <?php endif; ?>
                 </tbody>
             </table>
@@ -102,17 +111,41 @@
 
     <div class="col-md-4">
         <div class="pd-card">
-            <h6 class="fw-bold mb-3">Totals</h6>
-            <div class="d-flex justify-content-between mb-2"><span class="text-muted">Subtotal</span><span>৳ <?= number_format((float) $sale['subtotal'], 2) ?></span></div>
-            <div class="d-flex justify-content-between mb-2"><span class="text-muted">Discount</span><span>− ৳ <?= number_format((float) $sale['discount'], 2) ?></span></div>
-            <div class="d-flex justify-content-between mb-2"><span class="text-muted">Tax</span><span>+ ৳ <?= number_format((float) $sale['tax'], 2) ?></span></div>
+            <h6 class="fw-semibold mb-4" style="color:var(--mz-text-muted);font-size:.75rem;text-transform:uppercase;letter-spacing:.5px;">Totals</h6>
+            <div class="d-flex justify-content-between mb-3">
+                <span class="text-muted">Subtotal</span>
+                <span>৳ <?= number_format((float) $sale['subtotal'], 2) ?></span>
+            </div>
+            <div class="d-flex justify-content-between mb-3">
+                <span class="text-muted">Discount</span>
+                <span>− ৳ <?= number_format((float) $sale['discount'], 2) ?></span>
+            </div>
+            <div class="d-flex justify-content-between mb-3">
+                <span class="text-muted">Tax</span>
+                <span>+ ৳ <?= number_format((float) $sale['tax'], 2) ?></span>
+            </div>
             <hr>
-            <div class="d-flex justify-content-between mb-2 fs-5"><span class="fw-bold">Total</span><span class="fw-bold">৳ <?= number_format((float) $sale['total_amount'], 2) ?></span></div>
-            <div class="d-flex justify-content-between mb-2"><span class="text-muted">Paid</span><span class="text-success">৳ <?= number_format((float) $sale['paid_amount'], 2) ?></span></div>
-            <div class="d-flex justify-content-between"><span class="text-muted">Due</span><span class="fw-bold text-danger">৳ <?= number_format((float) $sale['due_amount'], 2) ?></span></div>
-            <div class="text-center mt-3">
+            <div class="d-flex justify-content-between mb-3">
+                <span class="fw-bold" style="font-size:1.05rem;">Total</span>
+                <span class="fw-bold" style="font-size:1.05rem;">৳ <?= number_format((float) $sale['total_amount'], 2) ?></span>
+            </div>
+            <div class="d-flex justify-content-between mb-3">
+                <span class="text-muted">Paid</span>
+                <span style="color:#02a98f;">৳ <?= number_format((float) $sale['paid_amount'], 2) ?></span>
+            </div>
+            <div class="d-flex justify-content-between mb-4">
+                <span class="text-muted">Due</span>
+                <span class="fw-bold" style="color:#FA896B;">৳ <?= number_format((float) $sale['due_amount'], 2) ?></span>
+            </div>
+            <div class="text-center">
                 <?php $st = $sale['payment_status']; ?>
-                <span class="badge badge-status <?= $st === 'paid' ? 'bg-success' : ($st === 'partial' ? 'bg-warning' : 'bg-danger') ?> px-3 py-2"><?= esc(ucfirst($st)) ?></span>
+                <?php if ($st === 'paid'): ?>
+                    <span class="badge-success-soft" style="font-size:.85rem;padding:.5em 1.5em;">Paid</span>
+                <?php elseif ($st === 'partial'): ?>
+                    <span class="badge-warning-soft" style="font-size:.85rem;padding:.5em 1.5em;">Partial</span>
+                <?php else: ?>
+                    <span class="badge-danger-soft" style="font-size:.85rem;padding:.5em 1.5em;">Due</span>
+                <?php endif; ?>
             </div>
         </div>
     </div>

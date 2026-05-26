@@ -1,16 +1,20 @@
 <?= $this->extend('layouts/admin') ?>
 <?= $this->section('content') ?>
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="mz-page-header d-flex align-items-center justify-content-between">
     <div>
-        <h4 class="m-0 fw-bold">New Sale</h4>
-        <p class="text-muted small m-0">Invoice <?= esc($next_invoice) ?></p>
+        <h4>New Sale</h4>
+        <ul class="mz-breadcrumb">
+            <li>Business</li>
+            <li><a href="<?= site_url('admin/sales') ?>" class="text-muted text-decoration-none">Sales</a></li>
+            <li>Invoice <?= esc($next_invoice) ?></li>
+        </ul>
     </div>
     <a href="<?= site_url('admin/sales') ?>" class="btn btn-light"><i class="bi bi-arrow-left me-2"></i>Back</a>
 </div>
 
 <?php if ($err = session()->getFlashdata('error')): ?>
-    <div class="alert alert-danger"><?= esc($err) ?></div>
+    <div class="alert alert-danger mb-4"><?= esc($err) ?></div>
 <?php endif; ?>
 
 <form method="post" action="<?= esc($action) ?>" id="saleForm">
@@ -18,12 +22,12 @@
     <div class="row g-3">
         <div class="col-md-8">
             <div class="pd-card">
-                <h6 class="fw-bold mb-3">Header</h6>
+                <h6 class="fw-bold mb-4" style="color:var(--mz-text-primary);">Sale Header</h6>
                 <div class="row g-3">
                     <div class="col-md-6">
                         <label class="form-label fw-semibold">Customer <span class="text-danger">*</span></label>
                         <select name="customer_un_id" class="form-select" required>
-                            <option value="">Select customer...</option>
+                            <option value="">Select customer…</option>
                             <?php foreach (($customers ?? []) as $c): ?>
                                 <option value="<?= esc($c['un_id']) ?>"><?= esc($c['customer_name']) ?> <?= $c['phone'] ? '— ' . esc($c['phone']) : '' ?></option>
                             <?php endforeach; ?>
@@ -57,13 +61,22 @@
             </div>
 
             <div class="pd-card">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h6 class="fw-bold m-0">Line Items</h6>
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h6 class="fw-bold m-0" style="color:var(--mz-text-primary);">Line Items</h6>
                     <button type="button" class="btn btn-sm btn-light" onclick="addItem()"><i class="bi bi-plus-circle me-1"></i>Add Row</button>
                 </div>
                 <div class="table-responsive">
                     <table class="table align-middle" id="itemsTable">
-                        <thead><tr><th>Product</th><th style="width:100px;">Qty</th><th style="width:90px;">Unit</th><th style="width:120px;">Price (৳)</th><th style="width:130px;" class="text-end">Total</th><th style="width:60px;"></th></tr></thead>
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th style="width:100px;">Qty</th>
+                                <th style="width:90px;">Unit</th>
+                                <th style="width:120px;">Price (৳)</th>
+                                <th style="width:130px;" class="text-end">Total</th>
+                                <th style="width:60px;"></th>
+                            </tr>
+                        </thead>
                         <tbody id="itemsBody"></tbody>
                     </table>
                 </div>
@@ -71,26 +84,35 @@
         </div>
 
         <div class="col-md-4">
-            <div class="pd-card sticky-top" style="top:90px;">
-                <h6 class="fw-bold mb-3">Summary</h6>
-                <div class="d-flex justify-content-between mb-2"><span class="text-muted">Subtotal</span><span id="subtotal">৳ 0.00</span></div>
-                <div class="row g-2 mb-2">
+            <div class="pd-card" style="position:sticky;top:90px;">
+                <h6 class="fw-bold mb-4" style="color:var(--mz-text-primary);">Order Summary</h6>
+                <div class="d-flex justify-content-between mb-3">
+                    <span class="text-muted">Subtotal</span>
+                    <span id="subtotal" class="fw-semibold">৳ 0.00</span>
+                </div>
+                <div class="row g-2 mb-3">
                     <div class="col-6">
-                        <label class="form-label small text-muted mb-0">Discount</label>
+                        <label class="form-label" style="font-size:.78rem;color:var(--mz-text-muted);margin-bottom:4px;">Discount (৳)</label>
                         <input type="number" step="0.01" name="discount" id="discount" class="form-control form-control-sm" value="0" oninput="recalc()">
                     </div>
                     <div class="col-6">
-                        <label class="form-label small text-muted mb-0">Tax</label>
+                        <label class="form-label" style="font-size:.78rem;color:var(--mz-text-muted);margin-bottom:4px;">Tax (৳)</label>
                         <input type="number" step="0.01" name="tax" id="tax" class="form-control form-control-sm" value="0" oninput="recalc()">
                     </div>
                 </div>
                 <hr>
-                <div class="d-flex justify-content-between mb-2 fs-5"><span class="fw-bold">Total</span><span class="fw-bold" id="total">৳ 0.00</span></div>
-                <div class="mb-2">
-                    <label class="form-label small fw-semibold mb-1">Paid Now</label>
+                <div class="d-flex justify-content-between mb-4">
+                    <span class="fw-bold" style="font-size:1.05rem;">Total</span>
+                    <span class="fw-bold" id="total" style="font-size:1.05rem;">৳ 0.00</span>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold" style="font-size:.82rem;">Paid Now (৳)</label>
                     <input type="number" step="0.01" name="paid_amount" id="paidAmount" class="form-control" value="0" oninput="recalc()">
                 </div>
-                <div class="d-flex justify-content-between mb-3"><span class="text-muted">Due</span><span class="fw-semibold text-danger" id="dueAmount">৳ 0.00</span></div>
+                <div class="d-flex justify-content-between mb-4">
+                    <span class="text-muted">Due</span>
+                    <span class="fw-semibold" id="dueAmount" style="color:#FA896B;">৳ 0.00</span>
+                </div>
                 <button class="btn btn-primary w-100" type="submit"><i class="bi bi-check-circle me-2"></i>Save Sale</button>
             </div>
         </div>
@@ -120,22 +142,20 @@ function recalc() {
         tr.querySelector('.line-total').textContent = '৳ ' + t.toFixed(2);
         subtotal += t;
     });
-    const disc = parseFloat(document.getElementById('discount').value) || 0;
-    const tax  = parseFloat(document.getElementById('tax').value) || 0;
+    const disc  = parseFloat(document.getElementById('discount').value) || 0;
+    const tax   = parseFloat(document.getElementById('tax').value) || 0;
     const total = Math.max(0, subtotal - disc + tax);
     document.getElementById('subtotal').textContent = '৳ ' + subtotal.toFixed(2);
     document.getElementById('total').textContent    = '৳ ' + total.toFixed(2);
-
-    // For cash sales auto-fill paid = total
     if (document.getElementById('saleType').value === 'cash') {
         document.getElementById('paidAmount').value = total.toFixed(2);
     }
     const paid = parseFloat(document.getElementById('paidAmount').value) || 0;
-    const due = Math.max(0, total - paid);
+    const due  = Math.max(0, total - paid);
     document.getElementById('dueAmount').textContent = '৳ ' + due.toFixed(2);
 }
 document.getElementById('saleType').addEventListener('change', recalc);
-addItem(); // start with one row
+addItem();
 </script>
 
 <?= $this->endSection() ?>
