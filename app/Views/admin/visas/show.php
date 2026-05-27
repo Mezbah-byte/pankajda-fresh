@@ -86,7 +86,14 @@
     </div>
 
     <div class="col-md-4">
-        <div class="pd-card">
+        <!-- Stage Timeline -->
+        <div class="pd-card mb-3">
+            <h6 class="fw-semibold mb-3">Pipeline Timeline</h6>
+            <?= $this->include('admin/visas/_timeline') ?>
+        </div>
+        <!-- Add Stage Form -->
+        <?= $this->include('admin/visas/_stage_form') ?>
+        <div class="pd-card mt-3">
             <h6 class="fw-semibold mb-4" style="color:var(--mz-text-muted);font-size:.75rem;text-transform:uppercase;letter-spacing:.5px;">Cost Summary</h6>
             <div class="d-flex justify-content-between mb-3">
                 <span class="text-muted">Visa Cost</span>
@@ -111,6 +118,7 @@
                     <span class="badge-danger-soft" style="font-size:.85rem;padding:.5em 1.5em;">Due</span>
                 <?php endif; ?>
             </div>
+        </div>
         </div>
     </div>
 </div>

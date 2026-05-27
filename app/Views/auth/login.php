@@ -315,7 +315,7 @@
                 <div style="margin-bottom:20px;">
                     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
                         <label class="lp-label" for="password" style="margin:0;">Password</label>
-                        <a href="#" style="font-size:.78rem;color:#5D87FF;text-decoration:none;">Forgot password?</a>
+                        <a href="<?= site_url('forgot-password') ?>" style="font-size:.78rem;color:#5D87FF;text-decoration:none;">Forgot password?</a>
                     </div>
                     <input
                         type="password"

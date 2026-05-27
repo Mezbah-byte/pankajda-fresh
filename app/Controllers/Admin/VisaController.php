@@ -5,6 +5,7 @@ namespace App\Controllers\Admin;
 use App\Controllers\BaseController;
 use App\Repositories\CompanyRepository;
 use App\Services\VisaService;
+use App\Services\VisaPipelineService;
 
 class VisaController extends BaseController
 {
@@ -68,12 +69,15 @@ class VisaController extends BaseController
         $visa = $this->service->get($unId);
         if (! $visa) return redirect()->to('admin/visas')->with('error', 'Visa not found.');
         $payments = $this->service->paymentsFor($unId);
-        $company = $this->companies->findByUnId($visa['company_un_id'] ?? '');
+        $company  = $this->companies->findByUnId($visa['company_un_id'] ?? '');
+        $pipeline = new VisaPipelineService();
         return view('admin/visas/show', [
-            'title'    => $visa['visa_name'],
-            'visa'     => $visa,
-            'payments' => $payments,
-            'company'  => $company,
+            'title'        => $visa['visa_name'],
+            'visa'         => $visa,
+            'payments'     => $payments,
+            'company'      => $company,
+            'stages'       => $pipeline->stagesFor($unId),
+            'stages_list'  => VisaPipelineService::STAGES,
         ]);
     }
 

@@ -36,7 +36,12 @@ class HomeController extends BaseController
 
     public function contact()
     {
-        return view('web/contact', ['title' => 'Contact Us']);
+        return view('web/contact', [
+            'title'          => 'Contact Us',
+            'contact_email'  => 'info@pankajda.com',
+            'contact_phone'  => '+880 1XXX-XXXXXX',
+            'contact_address' => 'Dhaka, Bangladesh',
+        ]);
     }
 
     public function submitContact()
@@ -49,7 +54,17 @@ class HomeController extends BaseController
         if (! $this->validate($rules)) {
             return redirect()->back()->withInput()->with('error', 'Please correct the errors.');
         }
-        // TODO: persist or email — for now we acknowledge
+
+        // Log the inquiry
+        log_message('info', 'Contact form submission from: ' . $this->request->getPost('email'));
+
+        // TODO: Send email notification in production:
+        // \Config\Services::email()
+        //     ->setTo('info@pankajda.com')
+        //     ->setSubject('New Contact Form: ' . $this->request->getPost('name'))
+        //     ->setMessage($this->request->getPost('message'))
+        //     ->send();
+
         return redirect()->to('contact')->with('success', 'Thank you! We\'ll be in touch soon.');
     }
 }

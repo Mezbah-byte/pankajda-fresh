@@ -23,6 +23,12 @@ $routes->get('login', 'Web\AuthController::loginForm');
 $routes->post('login', 'Web\AuthController::doLogin');
 $routes->get('logout', 'Web\AuthController::logout');
 
+// Password Reset
+$routes->get('forgot-password',  'Web\PasswordResetController::forgot');
+$routes->post('forgot-password', 'Web\PasswordResetController::sendLink');
+$routes->get('reset-password',   'Web\PasswordResetController::reset');
+$routes->post('reset-password',  'Web\PasswordResetController::doReset');
+
 $routes->get('setup/(:any)', 'Setup::index/$1');
 
 // ----------------------------------------------------------------------
@@ -44,6 +50,7 @@ $routes->group('admin', ['filter' => 'webAuth'], static function ($routes) {
     // Visas
     $routes->get('visas', 'Admin\VisaController::index');
     $routes->get('visas/create', 'Admin\VisaController::create');
+    $routes->get('visas/pipeline', 'Admin\VisaPipelineController::index');
     $routes->post('visas', 'Admin\VisaController::store');
     $routes->get('visas/(:segment)', 'Admin\VisaController::show/$1');
     $routes->get('visas/(:segment)/edit', 'Admin\VisaController::edit/$1');
@@ -125,6 +132,80 @@ $routes->group('admin', ['filter' => 'webAuth'], static function ($routes) {
     $routes->post('notifications/(:segment)/read',            'Admin\NotificationController::markRead/$1');
     $routes->post('notifications/read-all',                   'Admin\NotificationController::markAllRead');
     $routes->post('notifications/(:segment)/dismiss',         'Admin\NotificationController::dismiss/$1');
+
+    // Users (admin)
+    $routes->get('users',                                     'Admin\UserController::index');
+    $routes->get('users/create',                              'Admin\UserController::create');
+    $routes->post('users',                                    'Admin\UserController::store');
+    $routes->get('users/(:segment)',                          'Admin\UserController::show/$1');
+    $routes->get('users/(:segment)/edit',                     'Admin\UserController::edit/$1');
+    $routes->post('users/(:segment)',                         'Admin\UserController::update/$1');
+    $routes->post('users/(:segment)/delete',                  'Admin\UserController::delete/$1');
+
+    // Products
+    $routes->get('products',                                  'Admin\ProductController::index');
+    $routes->get('products/create',                           'Admin\ProductController::create');
+    $routes->post('products',                                 'Admin\ProductController::store');
+    $routes->get('products/(:segment)/edit',                  'Admin\ProductController::edit/$1');
+    $routes->post('products/(:segment)',                      'Admin\ProductController::update/$1');
+    $routes->post('products/(:segment)/delete',               'Admin\ProductController::delete/$1');
+
+    // Vendors
+    $routes->get('vendors',                                   'Admin\VendorController::index');
+    $routes->get('vendors/create',                            'Admin\VendorController::create');
+    $routes->post('vendors',                                  'Admin\VendorController::store');
+    $routes->get('vendors/(:segment)',                        'Admin\VendorController::show/$1');
+    $routes->get('vendors/(:segment)/edit',                   'Admin\VendorController::edit/$1');
+    $routes->post('vendors/(:segment)',                       'Admin\VendorController::update/$1');
+    $routes->post('vendors/(:segment)/delete',                'Admin\VendorController::delete/$1');
+    $routes->post('vendors/(:segment)/payment',               'Admin\VendorController::addPayment/$1');
+
+    // Bank Accounts
+    $routes->get('bank-accounts',                             'Admin\BankAccountController::index');
+    $routes->get('bank-accounts/create',                      'Admin\BankAccountController::create');
+    $routes->post('bank-accounts',                            'Admin\BankAccountController::store');
+    $routes->get('bank-accounts/(:segment)',                  'Admin\BankAccountController::show/$1');
+    $routes->get('bank-accounts/(:segment)/edit',             'Admin\BankAccountController::edit/$1');
+    $routes->post('bank-accounts/(:segment)',                 'Admin\BankAccountController::update/$1');
+    $routes->post('bank-accounts/(:segment)/delete',          'Admin\BankAccountController::delete/$1');
+    $routes->post('bank-accounts/(:segment)/adjust',          'Admin\BankAccountController::adjust/$1');
+
+    // Payroll
+    $routes->get('payroll',                                   'Admin\PayrollController::index');
+    $routes->get('payroll/create',                            'Admin\PayrollController::create');
+    $routes->post('payroll',                                  'Admin\PayrollController::store');
+    $routes->get('payroll/advances',                          'Admin\PayrollController::advances');
+    $routes->post('payroll/advances',                         'Admin\PayrollController::addAdvance');
+    $routes->get('payroll/(:segment)',                        'Admin\PayrollController::show/$1');
+    $routes->post('payroll/(:segment)/paid',                  'Admin\PayrollController::markPaid/$1');
+    $routes->post('payroll/(:segment)/delete',                'Admin\PayrollController::delete/$1');
+
+    // Stock
+    $routes->get('stock',                                     'Admin\StockController::index');
+    $routes->get('stock/create',                              'Admin\StockController::create');
+    $routes->post('stock',                                    'Admin\StockController::store');
+    $routes->get('stock/(:segment)',                          'Admin\StockController::show/$1');
+    $routes->get('stock/(:segment)/edit',                     'Admin\StockController::edit/$1');
+    $routes->post('stock/(:segment)',                         'Admin\StockController::update/$1');
+    $routes->post('stock/(:segment)/delete',                  'Admin\StockController::delete/$1');
+    $routes->post('stock/(:segment)/in',                      'Admin\StockController::stockIn/$1');
+    $routes->post('stock/(:segment)/out',                     'Admin\StockController::stockOut/$1');
+    $routes->post('stock/(:segment)/adjust',                  'Admin\StockController::adjust/$1');
+
+    // Visa Pipeline (GET already defined above visas/:segment for correct routing)
+    $routes->post('visas/(:segment)/stage',                   'Admin\VisaPipelineController::addStage/$1');
+
+    // Customer Ledger
+    $routes->get('customers/(:segment)/ledger',               'Admin\CustomerLedgerController::show/$1');
+    $routes->get('customers/(:segment)/ledger/print',         'Admin\CustomerLedgerController::print/$1');
+
+    // Activity Log
+    $routes->get('activity-log',                              'Admin\ActivityLogController::index');
+
+    // Import
+    $routes->get('import',                                    'Admin\ImportController::index');
+    $routes->post('import/upload',                            'Admin\ImportController::upload');
+    $routes->get('import/template/(:segment)',                'Admin\ImportController::template/$1');
 });
 
 // ----------------------------------------------------------------------

@@ -92,10 +92,24 @@
 
 <div class="text-center mt-5 text-muted small">Thank you for your business.</div>
 
-<div class="text-center mt-4 no-print">
-    <button class="btn btn-primary" onclick="window.print()"><i class="bi bi-printer"></i> Print</button>
+<div class="text-center mt-4 no-print d-flex gap-2 justify-content-center flex-wrap">
+    <button class="btn btn-primary" onclick="window.print()"><i class="bi bi-printer me-1"></i>Print</button>
+    <a class="btn btn-success" id="waShareBtn" href="#"
+       onclick="shareWhatsApp(); return false;" target="_blank">
+        <i class="bi bi-whatsapp me-1"></i>Share on WhatsApp
+    </a>
     <a class="btn btn-light" href="javascript:window.close()">Close</a>
 </div>
+<script>
+function shareWhatsApp() {
+    var invoiceNo = '<?= esc($sale['invoice_no']) ?>';
+    var customer  = '<?= esc(addslashes($customer['name'] ?? '')) ?>';
+    var amount    = '৳ <?= number_format((float)($sale['total_amount'] ?? 0), 2) ?>';
+    var url       = window.location.href;
+    var msg = 'Invoice ' + invoiceNo + ' for ' + customer + '\nAmount: ' + amount + '\nView: ' + url;
+    window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+}
+</script>
 
 </body>
 </html>

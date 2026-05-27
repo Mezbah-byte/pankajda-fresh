@@ -128,6 +128,10 @@
         ['url' => 'admin/customers/create',     'icon' => 'bi-person-plus',   'label' => 'Add Customer',   'color' => '#13DEB9'],
         ['url' => 'admin/sales/create',         'icon' => 'bi-cart-plus',     'label' => 'New Sale',       'color' => '#FFAE1F'],
         ['url' => 'admin/expenses/create',      'icon' => 'bi-cash-coin',     'label' => 'Add Expense',    'color' => '#FA896B'],
+        ['url' => 'admin/payroll/create',       'icon' => 'bi-wallet2',       'label' => 'Generate Payroll','color'=> '#5D87FF'],
+        ['url' => 'admin/stock',                'icon' => 'bi-archive',       'label' => 'Stock',          'color' => '#13DEB9'],
+        ['url' => 'admin/vendors',              'icon' => 'bi-truck',         'label' => 'Vendors',        'color' => '#FFAE1F'],
+        ['url' => 'admin/visas/pipeline',       'icon' => 'bi-kanban',        'label' => 'Visa Pipeline',  'color' => '#FA896B'],
     ];
     foreach ($quickLinks as $ql):
     ?>

@@ -26,6 +26,12 @@
     </div>
 
     <div class="mz-topbar-right">
+        <!-- Dark Mode Toggle -->
+        <button class="mz-icon-btn border-0" id="darkModeToggle" title="Toggle dark mode"
+                onclick="toggleDarkMode()" style="background:transparent;">
+            <i class="bi bi-moon" id="darkModeIcon"></i>
+        </button>
+
         <!-- Notification Bell -->
         <div class="dropdown">
             <button class="mz-icon-btn position-relative"
