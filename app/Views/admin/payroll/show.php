@@ -51,7 +51,7 @@
         <div class="col-md-6">
             <h6 class="text-uppercase text-muted mb-2" style="font-size:.72rem;letter-spacing:.6px;">Employee</h6>
             <table class="table table-borderless table-sm mb-0">
-                <tr><td class="text-muted" style="width:40%">Name</td><td class="fw-semibold"><?= esc($employee['full_name']) ?></td></tr>
+                <tr><td class="text-muted" style="width:40%">Name</td><td class="fw-semibold"><?= esc($employee['name']) ?></td></tr>
                 <tr><td class="text-muted">Designation</td><td><?= esc($employee['designation']??'-') ?></td></tr>
                 <tr><td class="text-muted">Department</td><td><?= esc($employee['department']??'-') ?></td></tr>
                 <tr><td class="text-muted">Join Date</td><td><?= esc($employee['join_date']??'-') ?></td></tr>

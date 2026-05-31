@@ -3,15 +3,18 @@
 namespace App\Services;
 
 use App\Repositories\VendorRepository;
+use App\Services\BankAccountService;
 use Config\Database;
 
 class VendorService extends BaseService
 {
-    private VendorRepository $vendors;
+    private VendorRepository   $vendors;
+    private BankAccountService $bankAccounts;
 
-    public function __construct(?VendorRepository $vendors = null)
+    public function __construct(?VendorRepository $vendors = null, ?BankAccountService $bankAccounts = null)
     {
-        $this->vendors = $vendors ?? new VendorRepository();
+        $this->vendors      = $vendors      ?? new VendorRepository();
+        $this->bankAccounts = $bankAccounts ?? new BankAccountService();
     }
 
     /**
@@ -97,11 +100,15 @@ class VendorService extends BaseService
         ]));
         $paymentData['vendor_un_id'] = $vendorUnId;
 
-        $newPayable = max(0, (float) $vendor['current_payable'] - $amount);
+        $newPayable   = max(0, (float) $vendor['current_payable'] - $amount);
+        $bankUnId     = $input['bank_account_un_id'] ?? null;
 
-        $payUnId = $this->transaction(function () use ($vendorUnId, $paymentData, $newPayable) {
+        $payUnId = $this->transaction(function () use ($vendorUnId, $paymentData, $newPayable, $bankUnId, $amount) {
             $unId = $this->vendors->createPayment($paymentData);
             $this->vendors->updateByUnId($vendorUnId, ['current_payable' => $newPayable]);
+            if ($bankUnId) {
+                $this->bankAccounts->adjustBalance($bankUnId, $amount, 'debit');
+            }
             return $unId;
         });
 

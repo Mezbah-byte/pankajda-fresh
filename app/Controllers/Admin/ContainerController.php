@@ -68,7 +68,54 @@ class ContainerController extends BaseController
             'title'     => $container['container_number'],
             'container' => $container,
             'company'   => $company,
+            'cartons'   => $this->service->cartonsFor($unId),
         ]);
+    }
+
+    public function storeCarton(string $unId)
+    {
+        if (! $this->validate([
+            'carton_number' => 'max_length[80]',
+            'quantity'      => 'permit_empty|decimal',
+            'weight_gross'  => 'permit_empty|decimal',
+            'weight_net'    => 'permit_empty|decimal',
+        ])) {
+            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        }
+        try {
+            $this->service->addCarton($unId, $this->request->getPost());
+        } catch (\InvalidArgumentException $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+        return redirect()->to('admin/containers/' . $unId)->with('success', 'Carton added.');
+    }
+
+    public function updateCarton(string $unId, string $cartonUnId)
+    {
+        if (! $this->validate([
+            'carton_number' => 'max_length[80]',
+            'quantity'      => 'permit_empty|decimal',
+            'weight_gross'  => 'permit_empty|decimal',
+            'weight_net'    => 'permit_empty|decimal',
+        ])) {
+            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        }
+        try {
+            $this->service->updateCarton($unId, $cartonUnId, $this->request->getPost());
+        } catch (\InvalidArgumentException $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+        return redirect()->to('admin/containers/' . $unId)->with('success', 'Carton updated.');
+    }
+
+    public function deleteCarton(string $unId, string $cartonUnId)
+    {
+        try {
+            $this->service->deleteCarton($unId, $cartonUnId);
+        } catch (\InvalidArgumentException $e) {
+            return redirect()->to('admin/containers/' . $unId)->with('error', $e->getMessage());
+        }
+        return redirect()->to('admin/containers/' . $unId)->with('success', 'Carton deleted.');
     }
 
     public function edit(string $unId)

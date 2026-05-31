@@ -31,7 +31,7 @@
             <select name="employee_un_id" class="form-select">
                 <option value="">All Employees</option>
                 <?php foreach (($employees ?? []) as $emp): ?>
-                    <option value="<?= esc($emp['un_id']) ?>" <?= ($filters['employee_un_id']??'')===$emp['un_id']?'selected':'' ?>><?= esc($emp['full_name']) ?></option>
+                    <option value="<?= esc($emp['un_id']) ?>" <?= ($filters['employee_un_id']??'')===$emp['un_id']?'selected':'' ?>><?= esc($emp['name']) ?></option>
                 <?php endforeach; ?>
             </select>
         </div>

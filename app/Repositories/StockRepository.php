@@ -36,7 +36,7 @@ class StockRepository extends BaseRepository
             ->where('status', 'active')
             ->where('deleted_at', null)
             ->where('min_qty >', 0)
-            ->where('current_qty <=', $this->model->db->protect('min_qty'))
+            ->where('current_qty <=', 'min_qty', false)
             ->findAll();
     }
 

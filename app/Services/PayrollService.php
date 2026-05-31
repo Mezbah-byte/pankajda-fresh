@@ -4,19 +4,23 @@ namespace App\Services;
 
 use App\Repositories\PayrollRepository;
 use App\Repositories\EmployeeAdvanceRepository;
+use App\Services\BankAccountService;
 use Config\Database;
 
 class PayrollService extends BaseService
 {
     private PayrollRepository         $payroll;
     private EmployeeAdvanceRepository $advances;
+    private BankAccountService        $bankAccounts;
 
     public function __construct(
         ?PayrollRepository $payroll = null,
-        ?EmployeeAdvanceRepository $advances = null
+        ?EmployeeAdvanceRepository $advances = null,
+        ?BankAccountService $bankAccounts = null
     ) {
-        $this->payroll  = $payroll  ?? new PayrollRepository();
-        $this->advances = $advances ?? new EmployeeAdvanceRepository();
+        $this->payroll      = $payroll      ?? new PayrollRepository();
+        $this->advances     = $advances     ?? new EmployeeAdvanceRepository();
+        $this->bankAccounts = $bankAccounts ?? new BankAccountService();
     }
 
     /**
@@ -63,7 +67,15 @@ class PayrollService extends BaseService
             );
         }
 
-        $unId = $this->transaction(fn () => $this->payroll->create($data));
+        $advanceDeduction = (float) ($data['advance_deduction'] ?? 0);
+
+        $unId = $this->transaction(function () use ($data, $advanceDeduction) {
+            $id = $this->payroll->create($data);
+            if ($advanceDeduction > 0) {
+                $this->advances->applyRepayment($data['employee_un_id'], $advanceDeduction);
+            }
+            return $id;
+        });
 
         $this->audit('payroll.generated', 'payroll', $unId, [
             'employee_un_id' => $data['employee_un_id'],
@@ -98,7 +110,15 @@ class PayrollService extends BaseService
             $data['notes'] = $input['notes'];
         }
 
-        $this->transaction(fn () => $this->payroll->updateByUnId($unId, $data));
+        $bankUnId  = $input['bank_account_un_id'] ?? null;
+        $netSalary = (float) ($this->payroll->findByUnId($unId)['net_salary'] ?? 0);
+
+        $this->transaction(function () use ($unId, $data, $bankUnId, $netSalary) {
+            $this->payroll->updateByUnId($unId, $data);
+            if ($bankUnId && $netSalary > 0) {
+                $this->bankAccounts->adjustBalance($bankUnId, $netSalary, 'debit');
+            }
+        });
 
         $this->audit('payroll.paid', 'payroll', $unId);
 
@@ -121,7 +141,7 @@ class PayrollService extends BaseService
     /**
      * Paginated advances for a specific employee.
      */
-    public function advances(string $empUnId, int $page = 1, int $perPage = 20): array
+    public function advances(?string $empUnId, int $page = 1, int $perPage = 20): array
     {
         return $this->advances->forEmployee($empUnId, $page, $perPage);
     }

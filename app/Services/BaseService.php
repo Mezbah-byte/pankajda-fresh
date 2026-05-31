@@ -49,7 +49,9 @@ abstract class BaseService
         ?string $entityUnId = null,
         array $context = []
     ): void {
-        $userUnId = session('user_un_id') ?? null;
+        // Session-based auth (web) or JWT auth (API) — whichever is set
+        $userUnId = session('user_un_id')
+            ?? (service('request')->auth_user['un_id'] ?? null);
         service('activityLogger')->log($action, $entityType, $entityUnId, $userUnId, $context);
     }
 }

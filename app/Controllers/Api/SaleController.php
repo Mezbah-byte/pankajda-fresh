@@ -67,7 +67,13 @@ class SaleController extends BaseApiController
     {
         if (! $unId) return $this->failNotFound();
         $body = $this->request->getJSON(true) ?? $this->request->getPost();
-        if (! $this->validateData($body, ['amount' => 'required|numeric|greater_than[0]'])) {
+        if (! $this->validateData($body, [
+            'amount'              => 'required|numeric|greater_than[0]',
+            'payment_method'      => 'permit_empty|max_length[50]',
+            'bank_account_un_id'  => 'permit_empty|max_length[60]',
+            'reference_no'        => 'permit_empty|max_length[100]',
+            'payment_date'        => 'permit_empty|valid_date',
+        ])) {
             return $this->failValidation($this->validator->getErrors());
         }
         try {

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Repositories\CustomerRepository;
 use App\Repositories\SaleRepository;
+use App\Services\BankAccountService;
 
 /**
  * SaleService - invoice creation, payment recording, due tracking.
@@ -15,13 +16,18 @@ use App\Repositories\SaleRepository;
  */
 class SaleService extends BaseService
 {
-    private SaleRepository $sales;
+    private SaleRepository     $sales;
     private CustomerRepository $customers;
+    private BankAccountService $bankAccounts;
 
-    public function __construct(?SaleRepository $sales = null, ?CustomerRepository $customers = null)
-    {
-        $this->sales     = $sales     ?? new SaleRepository();
-        $this->customers = $customers ?? new CustomerRepository();
+    public function __construct(
+        ?SaleRepository $sales = null,
+        ?CustomerRepository $customers = null,
+        ?BankAccountService $bankAccounts = null
+    ) {
+        $this->sales        = $sales        ?? new SaleRepository();
+        $this->customers    = $customers    ?? new CustomerRepository();
+        $this->bankAccounts = $bankAccounts ?? new BankAccountService();
     }
 
     public function list(array $filters, int $page = 1, int $perPage = 20): array
@@ -135,6 +141,9 @@ class SaleService extends BaseService
                     'payment_date'    => $input['sale_date'] ?? date('Y-m-d'),
                     'created_by_un_id'=> session('user_un_id'),
                 ]);
+                if (! empty($input['bank_account_un_id'])) {
+                    $this->bankAccounts->adjustBalance($input['bank_account_un_id'], $paid, 'credit');
+                }
             }
 
             // Adjust customer due: increases by total, decreases by paid (net = due)
@@ -188,6 +197,11 @@ class SaleService extends BaseService
             // Reduce customer's running due by the payment amount
             if ($sale['customer_un_id']) {
                 $this->customers->adjustDue($sale['customer_un_id'], -$amount);
+            }
+
+            // Credit bank account if specified
+            if (! empty($payload['bank_account_un_id'])) {
+                $this->bankAccounts->adjustBalance($payload['bank_account_un_id'], $amount, 'credit');
             }
 
             $this->audit('sale.payment_added', 'sale', $saleUnId, [

@@ -139,7 +139,7 @@ class StockService extends BaseService
         $db = Database::connect();
         $row = $db->table('stock_items')
             ->selectCount('id', 'total_items')
-            ->selectSum('current_qty * unit_cost', 'total_value')
+            ->select('SUM(current_qty * unit_cost) AS total_value', false)
             ->where('deleted_at', null)
             ->get()->getRowArray();
         return [

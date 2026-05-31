@@ -7,47 +7,49 @@ use Config\Services;
 
 class Setup extends Controller
 {
-    public function index($key = null)
+    private function authorize($key): void
     {
-        // Change this secret key
+        // Change this secret key before deploying
         if ($key !== 'my-secret-key') {
             exit('Unauthorized');
         }
+    }
+
+    public function index($key = null)
+    {
+        $this->authorize($key);
 
         try {
-
-            /*
-            |--------------------------------------------------------------------------
-            | RUN MIGRATIONS
-            |--------------------------------------------------------------------------
-            */
-
             $migrate = Services::migrations();
-
             $migrate->latest();
-
             echo "Migrations completed.<br>";
 
-            /*
-            |--------------------------------------------------------------------------
-            | RUN SEEDERS
-            |--------------------------------------------------------------------------
-            */
-
             $seeder = Services::seeder();
-
-            // Change UserSeeder to your seeder class name
-            $seeder->call('UserSeeder');
-
+            $seeder->call('DatabaseSeeder');
             echo "Seeder completed.<br>";
 
             echo "All done.";
-
         } catch (\Throwable $e) {
+            echo "<pre>" . $e->getMessage() . "</pre>";
+        }
+    }
 
-            echo "<pre>";
-            echo $e->getMessage();
-            echo "</pre>";
+    public function migrate($key = null)
+    {
+        $this->authorize($key);
+
+        try {
+            $migrate = Services::migrations();
+            $migrate->latest();
+            echo "Migrations completed successfully.<br>";
+
+            $all = $migrate->getHistory('default');
+            echo "<br>Applied migrations:<br>";
+            foreach ($all as $row) {
+                echo "- " . $row->version . " " . $row->class . "<br>";
+            }
+        } catch (\Throwable $e) {
+            echo "<pre>" . $e->getMessage() . "</pre>";
         }
     }
 }

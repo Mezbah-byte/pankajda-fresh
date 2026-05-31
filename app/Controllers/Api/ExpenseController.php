@@ -43,12 +43,14 @@ class ExpenseController extends BaseApiController
     {
         $body = $this->request->getJSON(true) ?? $this->request->getPost();
         $rules = [
-            'expense_title'  => 'required|min_length[2]|max_length[200]',
-            'category'       => 'required|max_length[80]',
-            'amount'         => 'required|numeric',
-            'expense_date'   => 'permit_empty|valid_date',
-            'payment_method' => 'permit_empty|max_length[40]',
-            'reference_no'   => 'permit_empty|max_length[60]',
+            'expense_title'      => 'required|min_length[2]|max_length[200]',
+            'category'           => 'required|max_length[80]',
+            'amount'             => 'required|numeric',
+            'expense_date'       => 'permit_empty|valid_date',
+            'payment_method'     => 'permit_empty|max_length[40]',
+            'bank_account_un_id' => 'permit_empty|max_length[60]',
+            'container_un_id'    => 'permit_empty|max_length[60]',
+            'reference_no'       => 'permit_empty|max_length[60]',
         ];
         if (! $this->validateData($body, $rules)) {
             return $this->failValidation($this->validator->getErrors());

@@ -37,8 +37,18 @@ class ContainerRepository extends BaseRepository
 
     public function totalSold(string $containerUnId): float
     {
-        $db = Database::connect();
+        $db  = Database::connect();
         $row = $db->table('sales')->selectSum('total_amount', 'total')
+            ->where('container_un_id', $containerUnId)
+            ->where('deleted_at', null)
+            ->get()->getRowArray();
+        return (float) ($row['total'] ?? 0);
+    }
+
+    public function totalExpenses(string $containerUnId): float
+    {
+        $db  = Database::connect();
+        $row = $db->table('expenses')->selectSum('amount', 'total')
             ->where('container_un_id', $containerUnId)
             ->where('deleted_at', null)
             ->get()->getRowArray();

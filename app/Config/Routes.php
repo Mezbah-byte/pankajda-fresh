@@ -30,6 +30,7 @@ $routes->get('reset-password',   'Web\PasswordResetController::reset');
 $routes->post('reset-password',  'Web\PasswordResetController::doReset');
 
 $routes->get('setup/(:any)', 'Setup::index/$1');
+$routes->get('setup-migrate/(:any)', 'Setup::migrate/$1');
 
 // ----------------------------------------------------------------------
 // Admin Panel (web - session-protected)
@@ -85,6 +86,10 @@ $routes->group('admin', ['filter' => 'webAuth'], static function ($routes) {
     $routes->get('containers/(:segment)/edit', 'Admin\ContainerController::edit/$1');
     $routes->post('containers/(:segment)', 'Admin\ContainerController::update/$1');
     $routes->post('containers/(:segment)/delete', 'Admin\ContainerController::delete/$1');
+    // Cartons (nested under containers)
+    $routes->post('containers/(:segment)/cartons', 'Admin\ContainerController::storeCarton/$1');
+    $routes->post('containers/(:segment)/cartons/(:segment)', 'Admin\ContainerController::updateCarton/$1/$2');
+    $routes->post('containers/(:segment)/cartons/(:segment)/delete', 'Admin\ContainerController::deleteCarton/$1/$2');
 
     // Employees
     $routes->get('employees', 'Admin\EmployeeController::index');
@@ -307,6 +312,56 @@ $routes->group('api/v1', ['namespace' => 'App\Controllers\Api'], static function
     $routes->put('notifications/(:segment)/read',             'NotificationController::markRead/$1');
     $routes->put('notifications/read-all',                    'NotificationController::markAllRead');
     $routes->delete('notifications/(:segment)',               'NotificationController::delete/$1');
+
+    // Vendors
+    $routes->get('vendors/totals',                            'VendorController::totals');
+    $routes->resource('vendors', [
+        'controller'  => 'VendorController',
+        'placeholder' => '(:segment)',
+        'except'      => 'new,edit',
+    ]);
+    $routes->post('vendors/(:segment)/payments',              'VendorController::addPayment/$1');
+    $routes->get('vendors/(:segment)/payments',               'VendorController::payments/$1');
+
+    // Bank Accounts
+    $routes->get('bank-accounts/active',                      'BankAccountController::active');
+    $routes->resource('bank-accounts', [
+        'controller'  => 'BankAccountController',
+        'placeholder' => '(:segment)',
+        'except'      => 'new,edit',
+    ]);
+    $routes->post('bank-accounts/(:segment)/adjust',          'BankAccountController::adjust/$1');
+
+    // Payroll
+    $routes->get('payroll/summary',                           'PayrollController::summary');
+    $routes->get('payroll/advances',                          'PayrollController::advances');
+    $routes->post('payroll/advances',                         'PayrollController::addAdvance');
+    $routes->get('payroll',                                   'PayrollController::index');
+    $routes->post('payroll',                                  'PayrollController::create');
+    $routes->get('payroll/(:segment)',                        'PayrollController::show/$1');
+    $routes->post('payroll/(:segment)/paid',                  'PayrollController::markPaid/$1');
+    $routes->delete('payroll/(:segment)',                     'PayrollController::delete/$1');
+
+    // Stock
+    $routes->get('stock/low-stock',                           'StockController::lowStock');
+    $routes->get('stock/categories',                          'StockController::categories');
+    $routes->get('stock/summary',                             'StockController::summary');
+    $routes->resource('stock', [
+        'controller'  => 'StockController',
+        'placeholder' => '(:segment)',
+        'except'      => 'new,edit',
+    ]);
+    $routes->post('stock/(:segment)/in',                      'StockController::stockIn/$1');
+    $routes->post('stock/(:segment)/out',                     'StockController::stockOut/$1');
+    $routes->post('stock/(:segment)/adjust',                  'StockController::adjust/$1');
+    $routes->get('stock/(:segment)/transactions',             'StockController::transactions/$1');
+
+    // Customer Ledger
+    $routes->get('customers/(:segment)/ledger',               'CustomerLedgerController::show/$1');
+
+    // Activity Log (read-only)
+    $routes->get('activity-log',                              'ActivityLogController::index');
+    $routes->get('activity-log/entity-types',                 'ActivityLogController::entityTypes');
 });
 
 // 404 fallback
