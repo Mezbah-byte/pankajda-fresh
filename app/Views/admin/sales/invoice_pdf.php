@@ -104,7 +104,8 @@
             <th>Product / Service</th>
             <th class="text-right">Qty</th>
             <th>Unit</th>
-            <th class="text-right">Unit Price</th>
+            <th class="text-right">Rate</th>
+            <th class="text-right">VAT</th>
             <th class="text-right">Amount</th>
         </tr>
     </thead>
@@ -116,6 +117,7 @@
             <td class="text-right"><?= number_format((float) $it['quantity'], 2) ?></td>
             <td><?= esc($it['unit']) ?></td>
             <td class="text-right">&#x9F3; <?= number_format((float) $it['unit_price'], 2) ?></td>
+            <td class="text-right">&#x9F3; <?= number_format((float) ($it['vat'] ?? 0), 2) ?></td>
             <td class="text-right" style="font-weight:600;">&#x9F3; <?= number_format((float) $it['total'], 2) ?></td>
         </tr>
         <?php endforeach; ?>

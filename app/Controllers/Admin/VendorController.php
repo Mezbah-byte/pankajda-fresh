@@ -4,6 +4,7 @@ namespace App\Controllers\Admin;
 
 use App\Controllers\BaseController;
 use App\Services\VendorService;
+use App\Services\ProductService;
 
 class VendorController extends BaseController
 {
@@ -59,10 +60,12 @@ class VendorController extends BaseController
         $vendor   = $this->service->get($unId);
         if (! $vendor) return redirect()->to('admin/vendors')->with('error', 'Vendor not found.');
         $payments = $this->service->payments($unId, 1, 20);
+        $products = (new ProductService())->forVendor($unId);
         return view('admin/vendors/show', [
             'title'    => $vendor['vendor_name'],
             'vendor'   => $vendor,
             'payments' => $payments,
+            'products' => $products,
         ]);
     }
 

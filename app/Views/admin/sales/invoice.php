@@ -54,7 +54,7 @@
 <table class="table mt-4">
     <thead style="background: #f7f8fc;">
         <tr>
-            <th>#</th><th>Product / Service</th><th class="text-end">Qty</th><th>Unit</th><th class="text-end">Rate</th><th class="text-end">Amount</th>
+            <th>#</th><th>Product / Service</th><th class="text-end">Qty</th><th>Unit</th><th class="text-end">Rate</th><th class="text-end">VAT</th><th class="text-end">Amount</th>
         </tr>
     </thead>
     <tbody>
@@ -65,6 +65,7 @@
                 <td class="text-end"><?= number_format((float) $it['quantity'], 2) ?></td>
                 <td><?= esc($it['unit']) ?></td>
                 <td class="text-end">৳ <?= number_format((float) $it['unit_price'], 2) ?></td>
+                <td class="text-end">৳ <?= number_format((float) ($it['vat'] ?? 0), 2) ?></td>
                 <td class="text-end fw-semibold">৳ <?= number_format((float) $it['total'], 2) ?></td>
             </tr>
         <?php endforeach; ?>

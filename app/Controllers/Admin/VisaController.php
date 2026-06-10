@@ -6,16 +6,26 @@ use App\Controllers\BaseController;
 use App\Repositories\CompanyRepository;
 use App\Services\VisaService;
 use App\Services\VisaPipelineService;
+use App\Services\CountryService;
+use App\Repositories\VisaRepository;
 
 class VisaController extends BaseController
 {
     private VisaService $service;
     private CompanyRepository $companies;
+    private CountryService $countryService;
 
     public function __construct()
     {
-        $this->service   = new VisaService();
-        $this->companies = new CompanyRepository();
+        $this->service        = new VisaService();
+        $this->companies      = new CompanyRepository();
+        $this->countryService = new CountryService();
+    }
+
+    private function countries(): array
+    {
+        $names = $this->countryService->names();
+        return $names ?: ['Bangladesh', 'Saudi Arabia', 'UAE', 'Qatar', 'Kuwait', 'Bahrain', 'Oman', 'Malaysia', 'Singapore'];
     }
 
     public function index()
@@ -25,20 +35,25 @@ class VisaController extends BaseController
             'q'              => $this->request->getGet('q'),
             'company_un_id'  => $this->request->getGet('company_un_id'),
             'payment_status' => $this->request->getGet('payment_status'),
+            'status'         => $this->request->getGet('status'),
         ];
-        $result = $this->service->list($filters, $page, 15);
+        $result    = $this->service->list($filters, $page, 15);
         $companies = $this->companies->search([], 1, 100)['items'];
+        $pipeline  = new VisaPipelineService();
         return view('admin/visas/index', [
-            'title'      => 'Visas',
-            'visas'      => $result['items'],
-            'companies'  => $companies,
-            'pagination' => [
+            'title'       => 'Visas',
+            'visas'       => $result['items'],
+            'companies'   => $companies,
+            'pagination'  => [
                 'page'      => $result['page'],
                 'per_page'  => $result['per_page'],
                 'total'     => $result['total'],
                 'last_page' => max(1, (int) ceil($result['total'] / max(1, $result['per_page']))),
             ],
-            'filters'    => $filters,
+            'filters'     => $filters,
+            'totals'      => $this->service->totals(),
+            'stage_counts' => $pipeline->pipeline(),
+            'stages_list'  => VisaPipelineService::STAGES,
         ]);
     }
 
@@ -48,6 +63,7 @@ class VisaController extends BaseController
             'title'     => 'Add Visa',
             'visa'      => null,
             'companies' => $this->companies->search([], 1, 100)['items'],
+            'countries' => $this->countries(),
             'action'    => site_url('admin/visas'),
         ]);
     }
@@ -68,17 +84,45 @@ class VisaController extends BaseController
     {
         $visa = $this->service->get($unId);
         if (! $visa) return redirect()->to('admin/visas')->with('error', 'Visa not found.');
-        $payments = $this->service->paymentsFor($unId);
-        $company  = $this->companies->findByUnId($visa['company_un_id'] ?? '');
-        $pipeline = new VisaPipelineService();
+        $payments   = $this->service->paymentsFor($unId);
+        $extraCosts = $this->service->extraCostsFor($unId);
+        $company    = $this->companies->findByUnId($visa['company_un_id'] ?? '');
+        $pipeline   = new VisaPipelineService();
         return view('admin/visas/show', [
             'title'        => $visa['visa_name'],
             'visa'         => $visa,
             'payments'     => $payments,
+            'extra_costs'  => $extraCosts,
             'company'      => $company,
             'stages'       => $pipeline->stagesFor($unId),
             'stages_list'  => VisaPipelineService::STAGES,
         ]);
+    }
+
+    public function addExtraCost(string $unId)
+    {
+        if (! $this->validate([
+            'description' => 'required|max_length[200]',
+            'amount'      => 'required|numeric|greater_than[0]',
+        ])) {
+            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        }
+        try {
+            $this->service->addExtraCost($unId, $this->request->getPost());
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+        return redirect()->to('admin/visas/' . $unId)->with('success', 'Extra cost added.');
+    }
+
+    public function deleteExtraCost(string $unId, string $costUnId)
+    {
+        try {
+            $this->service->deleteExtraCost($unId, $costUnId);
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+        return redirect()->to('admin/visas/' . $unId)->with('success', 'Extra cost removed.');
     }
 
     public function edit(string $unId)
@@ -89,6 +133,7 @@ class VisaController extends BaseController
             'title'     => 'Edit ' . $visa['visa_name'],
             'visa'      => $visa,
             'companies' => $this->companies->search([], 1, 100)['items'],
+            'countries' => $this->countries(),
             'action'    => site_url('admin/visas/' . $unId),
         ]);
     }

@@ -20,6 +20,17 @@ class ContainerCartonRepository extends BaseRepository
             ->findAll();
     }
 
+    public function forContainerBulk(array $containerUnIds): array
+    {
+        if (empty($containerUnIds)) return [];
+        return $this->model
+            ->whereIn('container_un_id', $containerUnIds)
+            ->where('deleted_at', null)
+            ->orderBy('container_un_id', 'ASC')
+            ->orderBy('id', 'ASC')
+            ->findAll();
+    }
+
     public function totalQuantity(string $containerUnId): float
     {
         $row = $this->model->builder()

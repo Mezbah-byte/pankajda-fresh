@@ -8,9 +8,12 @@ class VisaModel extends BaseModel
     protected string $unIdPrefix       = 'VSA';
     protected $allowedFields = [
         'un_id', 'company_un_id', 'visa_name', 'visa_number',
-        'country', 'category', 'beneficiary_name', 'passport_no',
+        'country', 'from_country', 'category', 'beneficiary_name', 'passport_no',
         'visa_cost', 'paid_amount', 'due_amount', 'payment_status',
-        'visa_issue_date', 'visa_expiry_date', 'status', 'notes',
+        'visa_issue_date', 'visa_expiry_date',
+        'work_permit_number', 'work_permit_issue_date', 'work_permit_expiry_date',
+        'purchase_price', 'selling_price', 'extra_costs', 'profit',
+        'status', 'notes',
     ];
 
     protected $validationRules = [

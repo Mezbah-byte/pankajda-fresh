@@ -4,17 +4,20 @@ namespace App\Controllers\Admin;
 
 use App\Controllers\BaseController;
 use App\Repositories\CompanyRepository;
+use App\Repositories\VendorRepository;
 use App\Services\ProductService;
 
 class ProductController extends BaseController
 {
     private ProductService    $service;
     private CompanyRepository $companies;
+    private VendorRepository  $vendors;
 
     public function __construct()
     {
         $this->service   = new ProductService();
         $this->companies = new CompanyRepository();
+        $this->vendors   = new VendorRepository();
     }
 
     public function index()
@@ -47,6 +50,7 @@ class ProductController extends BaseController
             'title'      => 'New Product',
             'product'    => null,
             'companies'  => $this->companies->search([], 1, 100)['items'],
+            'vendors'    => $this->vendors->search([], 1, 200)['items'],
             'categories' => $this->service->categories(),
             'action'     => site_url('admin/products'),
         ]);
@@ -76,6 +80,7 @@ class ProductController extends BaseController
             'title'      => 'Edit Product',
             'product'    => $product,
             'companies'  => $this->companies->search([], 1, 100)['items'],
+            'vendors'    => $this->vendors->search([], 1, 200)['items'],
             'categories' => $this->service->categories(),
             'action'     => site_url('admin/products/' . $unId),
         ]);

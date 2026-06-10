@@ -19,16 +19,31 @@
     </div>
 <?php endif; ?>
 
-<form method="post" action="<?= esc($action) ?>">
+<form method="post" action="<?= esc($action) ?>" enctype="multipart/form-data">
     <?= csrf_field() ?>
+
+    <!-- ── Identity ─────────────────────────────────────────────── -->
     <div class="pd-card">
-        <h6 class="fw-bold mb-4" style="color:var(--mz-text-primary);">Company Details</h6>
+        <h6 class="fw-bold mb-4" style="color:var(--mz-text-primary);">Identity & Classification</h6>
         <div class="row g-3">
-            <div class="col-md-8">
+            <div class="col-md-6">
                 <label class="form-label fw-semibold">Company Name <span class="text-danger">*</span></label>
-                <input type="text" class="form-control" name="company_name" value="<?= esc(old('company_name', $company['company_name'] ?? '')) ?>" required>
+                <input type="text" class="form-control" name="company_name"
+                       value="<?= esc(old('company_name', $company['company_name'] ?? '')) ?>" required>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">Company Type</label>
+                <select name="company_type" class="form-select">
+                    <option value="">-- Select type --</option>
+                    <?php foreach (($company_types ?? []) as $ct): ?>
+                        <option value="<?= esc($ct) ?>"
+                            <?= old('company_type', $company['company_type'] ?? '') === $ct ? 'selected' : '' ?>>
+                            <?= esc($ct) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="col-md-3">
                 <label class="form-label fw-semibold">Status</label>
                 <select name="status" class="form-select">
                     <?php foreach (['active','inactive','pending'] as $st): ?>
@@ -36,51 +51,136 @@
                     <?php endforeach; ?>
                 </select>
             </div>
-            <div class="col-md-6">
-                <label class="form-label fw-semibold">Company Type</label>
-                <input type="text" class="form-control" name="company_type" placeholder="Trading / Import / Farm / Service" value="<?= esc(old('company_type', $company['company_type'] ?? '')) ?>">
-            </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <label class="form-label fw-semibold">Trade License</label>
-                <input type="text" class="form-control" name="trade_license" value="<?= esc(old('trade_license', $company['trade_license'] ?? '')) ?>">
+                <input type="text" class="form-control" name="trade_license"
+                       value="<?= esc(old('trade_license', $company['trade_license'] ?? '')) ?>">
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Tax ID / VAT</label>
+                <input type="text" class="form-control" name="tax_id"
+                       value="<?= esc(old('tax_id', $company['tax_id'] ?? '')) ?>">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Established Date</label>
+                <input type="date" class="form-control" name="established_date"
+                       value="<?= esc(old('established_date', $company['established_date'] ?? '')) ?>">
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Contact ───────────────────────────────────────────────── -->
+    <div class="pd-card">
+        <h6 class="fw-bold mb-4" style="color:var(--mz-text-primary);">Contact Information</h6>
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Contact Person</label>
+                <input type="text" class="form-control" name="contact_person"
+                       value="<?= esc(old('contact_person', $company['contact_person'] ?? '')) ?>">
+            </div>
+            <div class="col-md-4">
                 <label class="form-label fw-semibold">Phone</label>
-                <input type="text" class="form-control" name="phone" value="<?= esc(old('phone', $company['phone'] ?? '')) ?>">
+                <input type="text" class="form-control" name="phone"
+                       value="<?= esc(old('phone', $company['phone'] ?? '')) ?>">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Fax</label>
+                <input type="text" class="form-control" name="fax"
+                       value="<?= esc(old('fax', $company['fax'] ?? '')) ?>">
             </div>
             <div class="col-md-6">
                 <label class="form-label fw-semibold">Email</label>
-                <input type="email" class="form-control" name="email" value="<?= esc(old('email', $company['email'] ?? '')) ?>">
+                <input type="email" class="form-control" name="email"
+                       value="<?= esc(old('email', $company['email'] ?? '')) ?>">
             </div>
-            <div class="col-md-8">
+            <div class="col-md-6">
+                <label class="form-label fw-semibold">Website</label>
+                <input type="url" class="form-control" name="website" placeholder="https://"
+                       value="<?= esc(old('website', $company['website'] ?? '')) ?>">
+            </div>
+            <div class="col-md-6">
                 <label class="form-label fw-semibold">Address</label>
-                <input type="text" class="form-control" name="address" value="<?= esc(old('address', $company['address'] ?? '')) ?>">
+                <input type="text" class="form-control" name="address"
+                       value="<?= esc(old('address', $company['address'] ?? '')) ?>">
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <label class="form-label fw-semibold">City</label>
-                <input type="text" class="form-control" name="city" value="<?= esc(old('city', $company['city'] ?? '')) ?>">
+                <input type="text" class="form-control" name="city"
+                       value="<?= esc(old('city', $company['city'] ?? '')) ?>">
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <label class="form-label fw-semibold">Country</label>
-                <input type="text" class="form-control" name="country" value="<?= esc(old('country', $company['country'] ?? 'Bangladesh')) ?>">
+                <input type="text" class="form-control" name="country"
+                       value="<?= esc(old('country', $company['country'] ?? 'Bangladesh')) ?>">
             </div>
+        </div>
+    </div>
+
+    <!-- ── Finance ───────────────────────────────────────────────── -->
+    <div class="pd-card">
+        <h6 class="fw-bold mb-4" style="color:var(--mz-text-primary);">Financial Settings</h6>
+        <div class="row g-3">
             <div class="col-md-4">
                 <label class="form-label fw-semibold">Currency</label>
-                <input type="text" class="form-control" name="currency" value="<?= esc(old('currency', $company['currency'] ?? 'BDT')) ?>">
+                <input type="text" class="form-control" name="currency" placeholder="BDT"
+                       value="<?= esc(old('currency', $company['currency'] ?? 'BDT')) ?>">
             </div>
             <div class="col-md-4">
                 <label class="form-label fw-semibold">Opening Balance</label>
-                <input type="number" step="0.01" class="form-control" name="opening_balance" value="<?= esc(old('opening_balance', $company['opening_balance'] ?? 0)) ?>">
+                <input type="number" step="0.01" class="form-control" name="opening_balance"
+                       value="<?= esc(old('opening_balance', $company['opening_balance'] ?? 0)) ?>">
             </div>
-            <div class="col-12">
+        </div>
+    </div>
+
+    <!-- ── Banking ───────────────────────────────────────────────── -->
+    <div class="pd-card">
+        <h6 class="fw-bold mb-4" style="color:var(--mz-text-primary);">Banking Details</h6>
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Bank Name</label>
+                <input type="text" class="form-control" name="bank_name"
+                       value="<?= esc(old('bank_name', $company['bank_name'] ?? '')) ?>">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Account Number</label>
+                <input type="text" class="form-control" name="bank_account"
+                       value="<?= esc(old('bank_account', $company['bank_account'] ?? '')) ?>">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Routing / SWIFT</label>
+                <input type="text" class="form-control" name="bank_routing"
+                       value="<?= esc(old('bank_routing', $company['bank_routing'] ?? '')) ?>">
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Logo & Notes ──────────────────────────────────────────── -->
+    <div class="pd-card">
+        <h6 class="fw-bold mb-4" style="color:var(--mz-text-primary);">Logo & Notes</h6>
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Company Logo</label>
+                <?php if (! empty($company['logo_path'])): ?>
+                    <div class="mb-2">
+                        <img src="<?= base_url($company['logo_path']) ?>" alt="Logo"
+                             style="max-height:80px;max-width:160px;object-fit:contain;border-radius:6px;border:1px solid #eee;padding:4px;">
+                        <div class="text-muted mt-1" style="font-size:.75rem;">Current logo. Upload new to replace.</div>
+                    </div>
+                <?php endif; ?>
+                <input type="file" class="form-control" name="logo" accept="image/*">
+                <div class="form-text">JPG, PNG, GIF — max 2 MB</div>
+            </div>
+            <div class="col-md-8">
                 <label class="form-label fw-semibold">Notes</label>
-                <textarea class="form-control" name="notes" rows="3"><?= esc(old('notes', $company['notes'] ?? '')) ?></textarea>
+                <textarea class="form-control" name="notes" rows="4"><?= esc(old('notes', $company['notes'] ?? '')) ?></textarea>
             </div>
         </div>
-        <div class="mt-4 d-flex gap-2">
-            <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle me-2"></i>Save Company</button>
-            <a href="<?= site_url('admin/companies') ?>" class="btn btn-light">Cancel</a>
-        </div>
+    </div>
+
+    <div class="mb-4 d-flex gap-2">
+        <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle me-2"></i>Save Company</button>
+        <a href="<?= site_url('admin/companies') ?>" class="btn btn-light">Cancel</a>
     </div>
 </form>
 

@@ -35,6 +35,55 @@ class ContainerRepository extends BaseRepository
         });
     }
 
+    public function listGroupedByCompany(array $filters): array
+    {
+        $db = Database::connect();
+        $builder = $db->table('containers c')
+            ->select('c.*, co.company_name')
+            ->join('companies co', 'co.un_id = c.company_un_id', 'left')
+            ->where('c.deleted_at', null);
+
+        if (! empty($filters['q'])) {
+            $q = $filters['q'];
+            $builder->groupStart()
+                ->like('c.container_number', $q)
+                ->orLike('c.bl_number', $q)
+                ->orLike('c.product_name', $q)
+                ->orLike('co.company_name', $q)
+                ->groupEnd();
+        }
+        if (! empty($filters['customs_status'])) {
+            $builder->where('c.customs_status', $filters['customs_status']);
+        }
+        if (! empty($filters['status'])) {
+            $builder->where('c.status', $filters['status']);
+        }
+
+        $containers = $builder
+            ->orderBy('co.company_name', 'ASC')
+            ->orderBy('c.id', 'DESC')
+            ->get()->getResultArray();
+
+        $grouped = [];
+        $serial  = [];
+        foreach ($containers as $c) {
+            $key = $c['company_un_id'] ?? '__none__';
+            if (! isset($grouped[$key])) {
+                $grouped[$key] = [
+                    'company_un_id' => $c['company_un_id'],
+                    'company_name'  => $c['company_name'] ?? 'No Supplier',
+                    'containers'    => [],
+                ];
+                $serial[$key] = 0;
+            }
+            $serial[$key]++;
+            $c['serial'] = $serial[$key];
+            $grouped[$key]['containers'][] = $c;
+        }
+
+        return array_values($grouped);
+    }
+
     public function totalSold(string $containerUnId): float
     {
         $db  = Database::connect();

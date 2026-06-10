@@ -38,15 +38,32 @@
             </div>
             <div class="col-md-4">
                 <label class="form-label">Sale Price (৳) <span class="text-danger">*</span></label>
-                <input type="number" step="0.01" min="0" class="form-control" name="sale_price" value="<?= esc(old('sale_price', $product['sale_price'] ?? '0')) ?>" required>
+                <input type="number" step="0.01" min="0" class="form-control" name="sale_price"
+                       value="<?= esc(old('sale_price', $product['default_price'] ?? '0')) ?>" required>
+                <div class="form-text">Price shown on sales/invoices.</div>
             </div>
             <div class="col-md-4">
                 <label class="form-label">Cost Price (৳)</label>
-                <input type="number" step="0.01" min="0" class="form-control" name="cost_price" value="<?= esc(old('cost_price', $product['cost_price'] ?? '0')) ?>">
+                <input type="number" step="0.01" min="0" class="form-control" name="cost_price"
+                       value="<?= esc(old('cost_price', $product['cost_price'] ?? '0')) ?>">
+                <div class="form-text">Purchase / landed cost.</div>
             </div>
             <div class="col-md-12">
                 <label class="form-label">Description</label>
                 <textarea class="form-control" name="description" rows="3"><?= esc(old('description', $product['description'] ?? '')) ?></textarea>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Primary Vendor / Supplier</label>
+                <select class="form-select" name="vendor_un_id">
+                    <option value="">— None —</option>
+                    <?php foreach (($vendors ?? []) as $v): ?>
+                        <option value="<?= esc($v['un_id']) ?>"
+                            <?= old('vendor_un_id', $product['vendor_un_id'] ?? '') === $v['un_id'] ? 'selected' : '' ?>>
+                            <?= esc($v['vendor_name']) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+                <div class="form-text">Vendor who supplies this product.</div>
             </div>
             <div class="col-md-4">
                 <label class="form-label">Status</label>

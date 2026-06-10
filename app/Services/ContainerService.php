@@ -25,6 +25,31 @@ class ContainerService extends BaseService
         return $this->containers->search($filters, $page, $perPage);
     }
 
+    public function listGroupedByCompany(array $filters): array
+    {
+        $grouped = $this->containers->listGroupedByCompany($filters);
+
+        // Collect all container un_ids, load cartons in one query, attach.
+        $allUnIds = [];
+        foreach ($grouped as $group) {
+            foreach ($group['containers'] as $c) {
+                $allUnIds[] = $c['un_id'];
+            }
+        }
+        $cartonMap = [];
+        if ($allUnIds) {
+            foreach ($this->cartons->forContainerBulk($allUnIds) as $carton) {
+                $cartonMap[$carton['container_un_id']][] = $carton;
+            }
+        }
+        foreach ($grouped as &$group) {
+            foreach ($group['containers'] as &$c) {
+                $c['cartons'] = $cartonMap[$c['un_id']] ?? [];
+            }
+        }
+        return $grouped;
+    }
+
     public function get(string $unId): ?array
     {
         $row = $this->containers->findByUnId($unId);

@@ -5,6 +5,7 @@ namespace App\Controllers\Admin;
 use App\Controllers\BaseController;
 use App\Repositories\CompanyRepository;
 use App\Services\CustomerService;
+use Config\Database;
 
 class CustomerController extends BaseController
 {
@@ -62,9 +63,55 @@ class CustomerController extends BaseController
     {
         $customer = $this->service->get($unId);
         if (! $customer) return redirect()->to('admin/customers')->with('error', 'Customer not found.');
+
+        $db = Database::connect();
+
+        // Company
+        $company = $customer['company_un_id']
+            ? $this->companies->findByUnId($customer['company_un_id'])
+            : null;
+
+        // Total payments received for this customer
+        $payRow = $db->table('sale_payments sp')
+            ->join('sales s', 's.un_id = sp.sale_un_id')
+            ->selectSum('sp.amount', 'total')
+            ->where('s.customer_un_id', $unId)
+            ->where('s.deleted_at', null)
+            ->where('sp.deleted_at', null)
+            ->get()->getRowArray();
+        $totalPayments = (float) ($payRow['total'] ?? 0);
+
+        // Total discount from all sales for this customer
+        $discRow = $db->table('sales')
+            ->selectSum('discount', 'total')
+            ->where('customer_un_id', $unId)
+            ->where('deleted_at', null)
+            ->get()->getRowArray();
+        $totalDiscount = (float) ($discRow['total'] ?? 0);
+
+        // Recent invoices (last 10)
+        $recentSales = $db->table('sales')
+            ->where('customer_un_id', $unId)
+            ->where('deleted_at', null)
+            ->orderBy('sale_date', 'DESC')
+            ->limit(10)
+            ->get()->getResultArray();
+
+        // GRVs for this customer
+        $grvs = $db->table('goods_return_vouchers')
+            ->where('customer_un_id', $unId)
+            ->where('deleted_at', null)
+            ->orderBy('grv_date', 'DESC')
+            ->get()->getResultArray();
+
         return view('admin/customers/show', [
-            'title'    => $customer['customer_name'],
-            'customer' => $customer,
+            'title'          => $customer['customer_name'],
+            'customer'       => $customer,
+            'company'        => $company,
+            'total_payments' => $totalPayments,
+            'total_discount' => $totalDiscount,
+            'recent_sales'   => $recentSales,
+            'grvs'           => $grvs,
         ]);
     }
 

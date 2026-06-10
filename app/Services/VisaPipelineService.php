@@ -7,6 +7,8 @@ use Config\Database;
 
 class VisaPipelineService extends BaseService
 {
+    public const NEW_KEY = '__new__';
+
     public const STAGES = [
         'applied'             => ['label' => 'Applied',             'color' => 'secondary'],
         'documents_submitted' => ['label' => 'Docs Submitted',      'color' => 'primary'],
@@ -55,30 +57,54 @@ class VisaPipelineService extends BaseService
 
     public function pipeline(): array
     {
-        $db     = Database::connect();
-        $counts = [];
-        foreach (array_keys(self::STAGES) as $stage) {
+        $db         = Database::connect();
+        $stageKeys  = array_keys(self::STAGES);
+        $counts     = [];
+
+        foreach ($stageKeys as $stage) {
             $counts[$stage] = (int) $db->table('visas')
                 ->where('status', $stage)
                 ->where('deleted_at', null)
                 ->countAllResults();
         }
+
+        // Visas not yet entered into any pipeline stage
+        $counts[self::NEW_KEY] = (int) $db->table('visas')
+            ->whereNotIn('status', $stageKeys)
+            ->where('deleted_at', null)
+            ->countAllResults();
+
         return $counts;
     }
 
     public function recentByStage(int $limit = 5): array
     {
-        $db     = Database::connect();
-        $result = [];
-        foreach (array_keys(self::STAGES) as $stage) {
-            $rows = $db->table('visas')
-                ->where('status', $stage)
-                ->where('deleted_at', null)
-                ->orderBy('updated_at', 'DESC')
+        $db        = Database::connect();
+        $stageKeys = array_keys(self::STAGES);
+        $result    = [];
+
+        foreach ($stageKeys as $stage) {
+            $rows = $db->table('visas v')
+                ->select('v.*, co.company_name')
+                ->join('companies co', 'co.un_id = v.company_un_id', 'left')
+                ->where('v.status', $stage)
+                ->where('v.deleted_at', null)
+                ->orderBy('v.updated_at', 'DESC')
                 ->limit($limit)
                 ->get()->getResultArray();
-            if ($rows) $result[$stage] = $rows;
+            $result[$stage] = $rows;
         }
+
+        // "New" bucket: visas with status outside pipeline stage keys
+        $result[self::NEW_KEY] = $db->table('visas v')
+            ->select('v.*, co.company_name')
+            ->join('companies co', 'co.un_id = v.company_un_id', 'left')
+            ->whereNotIn('v.status', $stageKeys)
+            ->where('v.deleted_at', null)
+            ->orderBy('v.updated_at', 'DESC')
+            ->limit($limit)
+            ->get()->getResultArray();
+
         return $result;
     }
 }

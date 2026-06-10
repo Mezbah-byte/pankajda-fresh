@@ -7,8 +7,8 @@ class ProductModel extends BaseModel
     protected $table             = 'products';
     protected string $unIdPrefix = 'PRD';
     protected $allowedFields     = [
-        'un_id', 'company_un_id', 'product_name', 'product_code',
-        'category', 'unit', 'default_price', 'description', 'status',
+        'un_id', 'company_un_id', 'vendor_un_id', 'product_name', 'product_code',
+        'category', 'unit', 'default_price', 'cost_price', 'description', 'status',
     ];
 
     protected $validationRules = [

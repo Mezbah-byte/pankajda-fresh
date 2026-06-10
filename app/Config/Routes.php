@@ -58,6 +58,8 @@ $routes->group('admin', ['filter' => 'webAuth'], static function ($routes) {
     $routes->post('visas/(:segment)', 'Admin\VisaController::update/$1');
     $routes->post('visas/(:segment)/delete', 'Admin\VisaController::delete/$1');
     $routes->post('visas/(:segment)/payments', 'Admin\VisaController::addPayment/$1');
+    $routes->post('visas/(:segment)/extra-costs', 'Admin\VisaController::addExtraCost/$1');
+    $routes->post('visas/(:segment)/extra-costs/(:segment)/delete', 'Admin\VisaController::deleteExtraCost/$1/$2');
 
     // Customers
     $routes->get('customers', 'Admin\CustomerController::index');
@@ -132,6 +134,20 @@ $routes->group('admin', ['filter' => 'webAuth'], static function ($routes) {
     $routes->get('settings', 'Admin\SettingController::index');
     $routes->post('settings', 'Admin\SettingController::update');
 
+    // Company Types
+    $routes->get('company-types',                              'Admin\CompanyTypeController::index');
+    $routes->post('company-types',                             'Admin\CompanyTypeController::store');
+    $routes->post('company-types/(:segment)',                  'Admin\CompanyTypeController::update/$1');
+    $routes->post('company-types/(:segment)/delete',           'Admin\CompanyTypeController::delete/$1');
+
+    // Countries
+    $routes->get('countries',                                  'Admin\CountryController::index');
+    $routes->post('countries',                                 'Admin\CountryController::store');
+    $routes->get('countries/(:segment)/edit',                  'Admin\CountryController::edit/$1');
+    $routes->post('countries/(:segment)',                      'Admin\CountryController::update/$1');
+    $routes->post('countries/(:segment)/delete',               'Admin\CountryController::delete/$1');
+    $routes->post('countries/(:segment)/toggle',               'Admin\CountryController::toggleActive/$1');
+
     // Notifications
     $routes->get('notifications',                              'Admin\NotificationController::index');
     $routes->post('notifications/(:segment)/read',            'Admin\NotificationController::markRead/$1');
@@ -203,6 +219,16 @@ $routes->group('admin', ['filter' => 'webAuth'], static function ($routes) {
     // Customer Ledger
     $routes->get('customers/(:segment)/ledger',               'Admin\CustomerLedgerController::show/$1');
     $routes->get('customers/(:segment)/ledger/print',         'Admin\CustomerLedgerController::print/$1');
+
+    // GRV (Goods Return Vouchers)
+    $routes->get('grv',                                       'Admin\GrvController::index');
+    $routes->get('grv/create',                                'Admin\GrvController::create');
+    $routes->post('grv',                                      'Admin\GrvController::store');
+    $routes->get('grv/(:segment)',                            'Admin\GrvController::show/$1');
+    $routes->get('grv/(:segment)/edit',                       'Admin\GrvController::edit/$1');
+    $routes->post('grv/(:segment)',                           'Admin\GrvController::update/$1');
+    $routes->post('grv/(:segment)/approve',                   'Admin\GrvController::approve/$1');
+    $routes->post('grv/(:segment)/delete',                    'Admin\GrvController::delete/$1');
 
     // Activity Log
     $routes->get('activity-log',                              'Admin\ActivityLogController::index');

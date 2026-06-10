@@ -23,7 +23,7 @@ class FarmProjectRepository extends BaseRepository
                 $q = $filters['q'];
                 $builder->groupStart()
                     ->like('project_name', $q)
-                    ->orLike('crop_name', $q)
+                    ->orLike('item_name', $q)
                     ->groupEnd();
             }
             if (! empty($filters['company_un_id'])) {
@@ -55,7 +55,7 @@ class FarmProjectRepository extends BaseRepository
     public function totalActivityCost(string $projectUnId): float
     {
         $row = $this->activities->builder()
-            ->selectSum('cost', 'total')
+            ->selectSum('rate', 'total')
             ->where('farm_project_un_id', $projectUnId)
             ->where('deleted_at', null)
             ->get()->getRowArray();
@@ -67,7 +67,7 @@ class FarmProjectRepository extends BaseRepository
         $db = Database::connect();
         $count   = $this->model->where('deleted_at', null)->countAllResults(false);
         $row = $db->table('farm_projects')
-            ->selectSum('total_cost', 'cost')
+            ->selectSum('total_rate', 'cost')
             ->selectSum('sale_amount', 'sale')
             ->selectSum('profit', 'profit')
             ->where('deleted_at', null)->get()->getRowArray();

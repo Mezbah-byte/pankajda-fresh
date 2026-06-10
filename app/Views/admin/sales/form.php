@@ -72,7 +72,8 @@
                                 <th>Product</th>
                                 <th style="width:100px;">Qty</th>
                                 <th style="width:90px;">Unit</th>
-                                <th style="width:120px;">Price (৳)</th>
+                                <th style="width:120px;">Rate (৳)</th>
+                                <th style="width:110px;">VAT (৳)</th>
                                 <th style="width:130px;" class="text-end">Total</th>
                                 <th style="width:60px;"></th>
                             </tr>
@@ -96,8 +97,8 @@
                         <input type="number" step="0.01" name="discount" id="discount" class="form-control form-control-sm" value="0" oninput="recalc()">
                     </div>
                     <div class="col-6">
-                        <label class="form-label" style="font-size:.78rem;color:var(--mz-text-muted);margin-bottom:4px;">Tax (৳)</label>
-                        <input type="number" step="0.01" name="tax" id="tax" class="form-control form-control-sm" value="0" oninput="recalc()">
+                        <label class="form-label" style="font-size:.78rem;color:var(--mz-text-muted);margin-bottom:4px;">VAT Total (৳)</label>
+                        <input type="number" step="0.01" name="tax" id="tax" class="form-control form-control-sm" value="0" readonly style="background:#f7f8fc;">
                     </div>
                 </div>
                 <hr>
@@ -128,6 +129,7 @@ function addItem() {
         <td><input type="number" step="0.001" min="0" class="form-control qty" name="items[${i}][quantity]" value="1" oninput="recalc()"></td>
         <td><input type="text" class="form-control" name="items[${i}][unit]" value="kg"></td>
         <td><input type="number" step="0.01" min="0" class="form-control price" name="items[${i}][unit_price]" value="0" oninput="recalc()"></td>
+        <td><input type="number" step="0.01" min="0" class="form-control item-vat" name="items[${i}][vat]" value="0" oninput="recalc()"></td>
         <td class="text-end fw-semibold line-total">৳ 0.00</td>
         <td><button type="button" class="btn btn-sm btn-light text-danger" onclick="this.closest('tr').remove();recalc()"><i class="bi bi-x"></i></button></td>`;
     document.getElementById('itemsBody').appendChild(tr);
@@ -135,15 +137,20 @@ function addItem() {
 }
 function recalc() {
     let subtotal = 0;
+    let totalVat = 0;
     document.querySelectorAll('#itemsBody tr').forEach(tr => {
         const q = parseFloat(tr.querySelector('.qty').value) || 0;
         const p = parseFloat(tr.querySelector('.price').value) || 0;
+        const v = parseFloat(tr.querySelector('.item-vat').value) || 0;
         const t = q * p;
         tr.querySelector('.line-total').textContent = '৳ ' + t.toFixed(2);
         subtotal += t;
+        totalVat += v;
     });
+    // Auto-fill tax field with sum of item VATs
+    document.getElementById('tax').value = totalVat.toFixed(2);
     const disc  = parseFloat(document.getElementById('discount').value) || 0;
-    const tax   = parseFloat(document.getElementById('tax').value) || 0;
+    const tax   = totalVat;
     const total = Math.max(0, subtotal - disc + tax);
     document.getElementById('subtotal').textContent = '৳ ' + subtotal.toFixed(2);
     document.getElementById('total').textContent    = '৳ ' + total.toFixed(2);

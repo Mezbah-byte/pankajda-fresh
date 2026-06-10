@@ -29,8 +29,8 @@
                 <input type="text" class="form-control" name="project_name" value="<?= esc(old('project_name', $project['project_name'] ?? '')) ?>" required>
             </div>
             <div class="col-md-3">
-                <label class="form-label fw-semibold">Crop Name</label>
-                <input type="text" class="form-control" name="crop_name" value="<?= esc(old('crop_name', $project['crop_name'] ?? '')) ?>">
+                <label class="form-label fw-semibold">Items</label>
+                <input type="text" class="form-control" name="item_name" value="<?= esc(old('item_name', $project['item_name'] ?? '')) ?>" placeholder="e.g. Rice, Vegetables">
             </div>
             <div class="col-md-3">
                 <label class="form-label fw-semibold">Status</label>
@@ -50,12 +50,12 @@
                 </select>
             </div>
             <div class="col-md-3">
-                <label class="form-label fw-semibold">Land Size</label>
-                <input type="number" step="0.01" class="form-control" name="land_size" value="<?= esc(old('land_size', $project['land_size'] ?? 0)) ?>">
+                <label class="form-label fw-semibold">Quantity</label>
+                <input type="number" step="0.01" class="form-control" name="quantity" value="<?= esc(old('quantity', $project['quantity'] ?? 0)) ?>">
             </div>
             <div class="col-md-3">
                 <label class="form-label fw-semibold">Unit</label>
-                <input type="text" class="form-control" name="land_unit" value="<?= esc(old('land_unit', $project['land_unit'] ?? 'acre')) ?>">
+                <input type="text" class="form-control" name="quantity_unit" value="<?= esc(old('quantity_unit', $project['quantity_unit'] ?? 'pcs')) ?>">
             </div>
             <div class="col-md-3">
                 <label class="form-label fw-semibold">Start Date</label>
@@ -66,8 +66,8 @@
                 <input type="date" class="form-control" name="end_date" value="<?= esc(old('end_date', $project['end_date'] ?? '')) ?>">
             </div>
             <div class="col-md-3">
-                <label class="form-label fw-semibold">Total Cost (৳)</label>
-                <input type="number" step="0.01" class="form-control" name="total_cost" value="<?= esc(old('total_cost', $project['total_cost'] ?? 0)) ?>">
+                <label class="form-label fw-semibold">Total Rate (৳)</label>
+                <input type="number" step="0.01" class="form-control" name="total_rate" value="<?= esc(old('total_rate', $project['total_rate'] ?? 0)) ?>">
             </div>
             <div class="col-md-3">
                 <label class="form-label fw-semibold">Production</label>

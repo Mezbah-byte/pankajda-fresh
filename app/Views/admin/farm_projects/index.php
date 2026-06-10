@@ -22,16 +22,12 @@
             <div class="fw-bold" style="font-size:1.1rem;color:var(--mz-text-primary);"><?= number_format($totals['count']) ?></div>
         </div>
         <div>
-            <span class="text-muted" style="font-size:.78rem;text-transform:uppercase;letter-spacing:.5px;">Total Cost</span>
+            <span class="text-muted" style="font-size:.78rem;text-transform:uppercase;letter-spacing:.5px;">Total Rate</span>
             <div class="fw-bold" style="font-size:1.1rem;color:var(--mz-text-primary);">৳ <?= number_format($totals['cost'], 0) ?></div>
         </div>
         <div>
             <span class="text-muted" style="font-size:.78rem;text-transform:uppercase;letter-spacing:.5px;">Total Sales</span>
             <div class="fw-bold" style="font-size:1.1rem;color:var(--mz-text-primary);">৳ <?= number_format($totals['sale'], 0) ?></div>
-        </div>
-        <div>
-            <span class="text-muted" style="font-size:.78rem;text-transform:uppercase;letter-spacing:.5px;">Profit</span>
-            <div class="fw-bold" style="font-size:1.1rem;color:<?= $totals['profit'] >= 0 ? '#02a98f' : '#FA896B' ?>;">৳ <?= number_format($totals['profit'], 0) ?></div>
         </div>
     </div>
 </div>
@@ -39,7 +35,7 @@
 <div class="pd-card">
     <form method="get" class="row g-2 mb-4">
         <div class="col-md-5">
-            <input type="text" class="form-control" name="q" placeholder="Search project, crop…" value="<?= esc($filters['q'] ?? '') ?>">
+            <input type="text" class="form-control" name="q" placeholder="Search project, items…" value="<?= esc($filters['q'] ?? '') ?>">
         </div>
         <div class="col-md-3">
             <select name="company_un_id" class="form-select">
@@ -64,7 +60,7 @@
     <div class="table-responsive">
         <table class="table align-middle">
             <thead>
-                <tr><th>Project</th><th>Crop</th><th>Land</th><th class="text-end">Cost</th><th class="text-end">Sale</th><th class="text-end">Profit</th><th>Status</th><th class="text-end">Actions</th></tr>
+                <tr><th>Project</th><th>Items</th><th>Quantity</th><th class="text-end">Rate</th><th class="text-end">Sale</th><th>Status</th><th class="text-end">Actions</th></tr>
             </thead>
             <tbody>
                 <?php foreach (($projects ?? []) as $p): ?>
@@ -72,13 +68,10 @@
                         <td>
                             <a href="<?= site_url('admin/farm-projects/' . $p['un_id']) ?>" class="fw-semibold text-decoration-none" style="color:var(--mz-primary);"><?= esc($p['project_name']) ?></a>
                         </td>
-                        <td><?= esc($p['crop_name'] ?? '-') ?></td>
-                        <td style="font-size:.82rem;"><?= number_format((float) $p['land_size'], 2) ?> <?= esc($p['land_unit'] ?? '') ?></td>
-                        <td class="text-end">৳ <?= number_format((float) $p['total_cost'], 0) ?></td>
+                        <td><?= esc($p['item_name'] ?? '-') ?></td>
+                        <td style="font-size:.82rem;"><?= number_format((float) $p['quantity'], 2) ?> <?= esc($p['quantity_unit'] ?? '') ?></td>
+                        <td class="text-end">৳ <?= number_format((float) $p['total_rate'], 0) ?></td>
                         <td class="text-end" style="color:#02a98f;">৳ <?= number_format((float) $p['sale_amount'], 0) ?></td>
-                        <td class="text-end fw-semibold" style="color:<?= ((float) $p['profit']) >= 0 ? '#02a98f' : '#FA896B' ?>;">
-                            ৳ <?= number_format((float) $p['profit'], 0) ?>
-                        </td>
                         <td><span class="badge-secondary-soft"><?= esc(ucfirst($p['status'] ?? 'active')) ?></span></td>
                         <td class="text-end">
                             <a href="<?= site_url('admin/farm-projects/' . $p['un_id']) ?>" class="btn btn-sm btn-light" title="View"><i class="bi bi-eye"></i></a>
@@ -88,7 +81,7 @@
                 <?php endforeach; ?>
                 <?php if (empty($projects)): ?>
                     <tr>
-                        <td colspan="8" class="text-center py-5">
+                        <td colspan="7" class="text-center py-5">
                             <i class="bi bi-tree" style="font-size:2.5rem;color:#E5EAF2;display:block;margin-bottom:10px;"></i>
                             <span class="text-muted">No farm projects yet.</span>
                         </td>

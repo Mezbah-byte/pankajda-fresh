@@ -63,12 +63,33 @@ class CompanyService extends BaseService
         return $this->companies->totals();
     }
 
+    public function getStats(string $unId): array
+    {
+        return $this->companies->statsForCompany($unId);
+    }
+
+    public function getRecentCustomers(string $unId, int $limit = 5): array
+    {
+        return $this->companies->recentCustomers($unId, $limit);
+    }
+
+    public function getRecentEmployees(string $unId, int $limit = 5): array
+    {
+        return $this->companies->recentEmployees($unId, $limit);
+    }
+
+    public function getRecentSales(string $unId, int $limit = 5): array
+    {
+        return $this->companies->recentSales($unId, $limit);
+    }
+
     private function normalize(array $input): array
     {
         $whitelisted = [
             'company_name', 'company_type', 'trade_license', 'tax_id',
-            'address', 'city', 'country', 'phone', 'email', 'website',
+            'address', 'city', 'country', 'phone', 'fax', 'contact_person', 'email', 'website',
             'logo_path', 'currency', 'opening_balance', 'notes', 'status',
+            'bank_name', 'bank_account', 'bank_routing', 'established_date',
         ];
         $data = array_intersect_key($input, array_flip($whitelisted));
         if (isset($data['email'])) {
@@ -76,6 +97,9 @@ class CompanyService extends BaseService
         }
         if (isset($data['company_name'])) {
             $data['company_name'] = trim((string) $data['company_name']);
+        }
+        if (isset($data['established_date']) && $data['established_date'] === '') {
+            $data['established_date'] = null;
         }
         return $data;
     }

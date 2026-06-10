@@ -29,6 +29,15 @@ class SettingService extends BaseService
         return $by;
     }
 
+    public function flat(): array
+    {
+        $flat = [];
+        foreach ($this->repo->all() as $row) {
+            $flat[$row['key']] = $row['value'];
+        }
+        return $flat;
+    }
+
     public function get(string $key, $default = null)
     {
         $v = $this->repo->get($key);
@@ -41,8 +50,8 @@ class SettingService extends BaseService
             foreach ($input as $key => $value) {
                 // Only persist non-array values; ignore framework fields
                 if (is_array($value)) continue;
-                if (str_starts_with($key, '_'))   continue;  // _method, _token etc.
-                if (in_array($key, ['csrf_token_name'], true)) continue;
+                if (str_starts_with($key, '_'))    continue;  // _method, _token etc.
+                if (str_starts_with($key, 'csrf_')) continue;  // csrf_test_name etc.
 
                 // Infer group from the key prefix (site., finance., invoice.)
                 $group = strpos($key, '.') !== false ? explode('.', $key, 2)[0] : 'general';

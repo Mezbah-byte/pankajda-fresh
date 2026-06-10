@@ -36,7 +36,7 @@ class FarmProjectService extends BaseService
     public function create(array $input): array
     {
         $data = $this->normalize($input);
-        $data['profit'] = (float) ($data['sale_amount'] ?? 0) - (float) ($data['total_cost'] ?? 0);
+        $data['profit'] = (float) ($data['sale_amount'] ?? 0) - (float) ($data['total_rate'] ?? 0);
         $unId = $this->transaction(fn () => $this->projects->create($data));
         $this->audit('farm_project.created', 'farm_project', $unId, ['project' => $data['project_name'] ?? '']);
         return $this->projects->findByUnId($unId);
@@ -50,7 +50,7 @@ class FarmProjectService extends BaseService
         }
         $data = $this->normalize($input);
         $sale = (float) ($data['sale_amount'] ?? $existing['sale_amount']);
-        $cost = (float) ($data['total_cost']  ?? $existing['total_cost']);
+        $cost = (float) ($data['total_rate']  ?? $existing['total_rate']);
         $data['profit'] = $sale - $cost;
         $this->transaction(fn () => $this->projects->updateByUnId($unId, $data));
         $this->audit('farm_project.updated', 'farm_project', $unId);
@@ -78,7 +78,7 @@ class FarmProjectService extends BaseService
         }
         $payload['farm_project_un_id'] = $projectUnId;
         $payload['activity_date']      = $payload['activity_date'] ?? date('Y-m-d');
-        $payload['cost']               = (float) ($payload['cost'] ?? 0);
+        $payload['rate']               = (float) ($payload['rate'] ?? 0);
 
         return $this->transaction(function () use ($projectUnId, $payload, $project) {
             $activityUnId = $this->projects->addActivity($payload);
@@ -88,12 +88,12 @@ class FarmProjectService extends BaseService
             $sale        = (float) $project['sale_amount'];
             $newTotal    = $activitySum;  // cost from all activities
             $this->projects->updateByUnId($projectUnId, [
-                'total_cost' => $newTotal,
+                'total_rate' => $newTotal,
                 'profit'     => $sale - $newTotal,
             ]);
             $this->audit('farm_project.activity_added', 'farm_project', $projectUnId, [
                 'activity_un_id' => $activityUnId,
-                'cost'           => $payload['cost'],
+                'rate'           => $payload['rate'],
             ]);
             return [
                 'project'  => $this->projects->findByUnId($projectUnId),
@@ -110,9 +110,9 @@ class FarmProjectService extends BaseService
     private function normalize(array $input): array
     {
         $whitelisted = [
-            'company_un_id', 'project_name', 'crop_name',
-            'land_size', 'land_unit', 'start_date', 'end_date',
-            'total_cost', 'production_amount', 'production_unit',
+            'company_un_id', 'project_name', 'item_name',
+            'quantity', 'quantity_unit', 'start_date', 'end_date',
+            'total_rate', 'production_amount', 'production_unit',
             'sale_amount', 'status', 'notes',
         ];
         return array_intersect_key($input, array_flip($whitelisted));

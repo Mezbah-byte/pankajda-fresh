@@ -8,6 +8,6 @@ class SaleItemModel extends BaseModel
     protected string $unIdPrefix       = 'ITM';
     protected $allowedFields = [
         'un_id', 'sale_un_id', 'product_name', 'quantity',
-        'unit', 'unit_price', 'total',
+        'unit', 'unit_price', 'vat', 'total',
     ];
 }

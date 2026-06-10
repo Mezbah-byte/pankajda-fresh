@@ -30,11 +30,59 @@ class VisaService extends BaseService
         return $this->visas->findByUnId($unId);
     }
 
+    public function extraCostsFor(string $visaUnId): array
+    {
+        return $this->visas->extraCostsFor($visaUnId);
+    }
+
+    public function addExtraCost(string $visaUnId, array $payload): void
+    {
+        $visa = $this->visas->findByUnId($visaUnId);
+        if (! $visa) throw new \InvalidArgumentException('Visa not found.');
+
+        $amount = (float) ($payload['amount'] ?? 0);
+        if ($amount <= 0) throw new \InvalidArgumentException('Amount must be greater than zero.');
+
+        $this->transaction(function () use ($visaUnId, $payload, $visa, $amount) {
+            $this->visas->addExtraCost($visaUnId, [
+                'description' => $payload['description'] ?? 'Extra Cost',
+                'amount'      => $amount,
+            ]);
+            $extraTotal = $this->visas->sumExtraCosts($visaUnId);
+            $profit = (float) $visa['selling_price'] - (float) $visa['purchase_price'] - $extraTotal;
+            $this->visas->updateByUnId($visaUnId, [
+                'extra_costs' => $extraTotal,
+                'profit'      => $profit,
+            ]);
+        });
+        $this->audit('visa.extra_cost_added', 'visa', $visaUnId, ['amount' => $amount]);
+    }
+
+    public function deleteExtraCost(string $visaUnId, string $costUnId): void
+    {
+        $visa = $this->visas->findByUnId($visaUnId);
+        if (! $visa) throw new \InvalidArgumentException('Visa not found.');
+
+        $this->transaction(function () use ($visaUnId, $costUnId, $visa) {
+            $this->visas->deleteExtraCost($costUnId);
+            $extraTotal = $this->visas->sumExtraCosts($visaUnId);
+            $profit = (float) $visa['selling_price'] - (float) $visa['purchase_price'] - $extraTotal;
+            $this->visas->updateByUnId($visaUnId, [
+                'extra_costs' => $extraTotal,
+                'profit'      => $profit,
+            ]);
+        });
+    }
+
     public function create(array $input): array
     {
         $data = $this->normalize($input);
         $data['paid_amount']    = (float) ($data['paid_amount'] ?? 0);
         $data['visa_cost']      = (float) ($data['visa_cost'] ?? 0);
+        $data['selling_price']  = (float) ($data['selling_price'] ?? $data['visa_cost']);
+        $data['purchase_price'] = (float) ($data['purchase_price'] ?? 0);
+        $data['extra_costs']    = (float) ($data['extra_costs'] ?? 0);
+        $data['profit']         = $data['selling_price'] - $data['purchase_price'] - $data['extra_costs'];
         $data['due_amount']     = max(0, $data['visa_cost'] - $data['paid_amount']);
         $data['payment_status'] = $this->statusFor($data['paid_amount'], $data['due_amount']);
 
@@ -52,9 +100,16 @@ class VisaService extends BaseService
         $data = $this->normalize($input);
 
         // Recompute due/status if cost or paid changed
-        $cost = (float) ($data['visa_cost'] ?? $existing['visa_cost']);
-        $paid = (float) ($data['paid_amount'] ?? $existing['paid_amount']);
+        $cost    = (float) ($data['visa_cost']      ?? $existing['visa_cost']);
+        $paid    = (float) ($data['paid_amount']    ?? $existing['paid_amount']);
+        $sell    = (float) ($data['selling_price']  ?? $existing['selling_price'] ?? $cost);
+        $buy     = (float) ($data['purchase_price'] ?? $existing['purchase_price'] ?? 0);
+        $extra   = (float) ($data['extra_costs']    ?? $existing['extra_costs'] ?? 0);
         $data['visa_cost']      = $cost;
+        $data['selling_price']  = $sell;
+        $data['purchase_price'] = $buy;
+        $data['extra_costs']    = $extra;
+        $data['profit']         = $sell - $buy - $extra;
         $data['paid_amount']    = $paid;
         $data['due_amount']     = max(0, $cost - $paid);
         $data['payment_status'] = $this->statusFor($paid, $data['due_amount']);
@@ -141,9 +196,12 @@ class VisaService extends BaseService
     private function normalize(array $input): array
     {
         $whitelisted = [
-            'company_un_id', 'visa_name', 'visa_number', 'country', 'category',
+            'company_un_id', 'visa_name', 'visa_number', 'country', 'from_country', 'category',
             'beneficiary_name', 'passport_no', 'visa_cost', 'paid_amount',
-            'visa_issue_date', 'visa_expiry_date', 'status', 'notes',
+            'visa_issue_date', 'visa_expiry_date',
+            'work_permit_number', 'work_permit_issue_date', 'work_permit_expiry_date',
+            'purchase_price', 'selling_price', 'extra_costs',
+            'status', 'notes',
         ];
         return array_intersect_key($input, array_flip($whitelisted));
     }

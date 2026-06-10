@@ -17,17 +17,21 @@
 </div>
 
 <div class="row g-3">
-    <div class="col-md-8">
+    <div class="col-md-12">
         <div class="pd-card">
             <h6 class="fw-semibold mb-4" style="color:var(--mz-text-muted);font-size:.75rem;text-transform:uppercase;letter-spacing:.5px;">Project Details</h6>
             <dl class="row mb-0">
-                <dt class="col-sm-4">Crop</dt><dd class="col-sm-8"><?= esc($project['crop_name'] ?? '-') ?></dd>
-                <dt class="col-sm-4">Land</dt><dd class="col-sm-8"><?= number_format((float) $project['land_size'], 2) ?> <?= esc($project['land_unit'] ?? '') ?></dd>
-                <dt class="col-sm-4">Start</dt><dd class="col-sm-8"><?= esc($project['start_date'] ?? '-') ?></dd>
-                <dt class="col-sm-4">End</dt><dd class="col-sm-8"><?= esc($project['end_date'] ?? '-') ?></dd>
-                <dt class="col-sm-4">Production</dt><dd class="col-sm-8"><?= number_format((float) $project['production_amount'], 2) ?> <?= esc($project['production_unit'] ?? '') ?></dd>
-                <dt class="col-sm-4">Company</dt><dd class="col-sm-8"><?= esc($company['company_name'] ?? '-') ?></dd>
-                <dt class="col-sm-4">Notes</dt><dd class="col-sm-8"><?= nl2br(esc($project['notes'] ?? '-')) ?></dd>
+                <dt class="col-sm-3">Items</dt><dd class="col-sm-3"><?= esc($project['item_name'] ?? '-') ?></dd>
+                <dt class="col-sm-3">Quantity</dt><dd class="col-sm-3"><?= number_format((float) $project['quantity'], 2) ?> <?= esc($project['quantity_unit'] ?? '') ?></dd>
+                <dt class="col-sm-3">Start</dt><dd class="col-sm-3"><?= esc($project['start_date'] ?? '-') ?></dd>
+                <dt class="col-sm-3">End</dt><dd class="col-sm-3"><?= esc($project['end_date'] ?? '-') ?></dd>
+                <dt class="col-sm-3">Production</dt><dd class="col-sm-3"><?= number_format((float) $project['production_amount'], 2) ?> <?= esc($project['production_unit'] ?? '') ?></dd>
+                <dt class="col-sm-3">Company</dt><dd class="col-sm-3"><?= esc($company['company_name'] ?? '-') ?></dd>
+                <dt class="col-sm-3">Total Rate</dt><dd class="col-sm-3">৳ <?= number_format((float) $project['total_rate'], 2) ?></dd>
+                <dt class="col-sm-3">Sale Amount</dt><dd class="col-sm-3" style="color:#02a98f;">৳ <?= number_format((float) $project['sale_amount'], 2) ?></dd>
+                <?php if (! empty($project['notes'])): ?>
+                    <dt class="col-sm-3 mt-3">Notes</dt><dd class="col-sm-9 mt-3"><?= nl2br(esc($project['notes'])) ?></dd>
+                <?php endif; ?>
             </dl>
         </div>
 
@@ -52,9 +56,9 @@
                             </select>
                         </div>
                         <div class="col-md-3"><input type="date" name="activity_date" class="form-control form-control-sm" value="<?= date('Y-m-d') ?>"></div>
-                        <div class="col-md-3"><input type="number" step="0.01" name="cost" class="form-control form-control-sm" placeholder="Cost (৳)"></div>
+                        <div class="col-md-3"><input type="number" step="0.01" name="rate" class="form-control form-control-sm" placeholder="Rate (৳)"></div>
                         <div class="col-md-3"><input type="number" name="worker_count" class="form-control form-control-sm" placeholder="Worker count"></div>
-                        <div class="col-md-6"><input type="text" name="seed_name" class="form-control form-control-sm" placeholder="Seed name (if applicable)"></div>
+                        <div class="col-md-6"><input type="text" name="seed_name" class="form-control form-control-sm" placeholder="Seed / item name (if applicable)"></div>
                         <div class="col-md-3"><input type="number" step="0.01" name="seed_quantity" class="form-control form-control-sm" placeholder="Qty"></div>
                         <div class="col-md-3"><input type="text" name="seed_unit" class="form-control form-control-sm" placeholder="Unit"></div>
                         <div class="col-12"><input type="text" name="description" class="form-control form-control-sm" placeholder="Description"></div>
@@ -65,7 +69,7 @@
 
             <div class="table-responsive">
                 <table class="table align-middle">
-                    <thead><tr><th>Date</th><th>Type</th><th>Description</th><th>Workers / Seeds</th><th class="text-end">Cost</th></tr></thead>
+                    <thead><tr><th>Date</th><th>Type</th><th>Description</th><th>Workers / Items</th><th class="text-end">Rate</th></tr></thead>
                     <tbody>
                         <?php foreach (($project['activities'] ?? []) as $a): ?>
                             <tr>
@@ -80,7 +84,7 @@
                                         <?= esc($a['seed_name']) ?> · <?= number_format((float) $a['seed_quantity'], 2) ?> <?= esc($a['seed_unit']) ?>
                                     <?php endif; ?>
                                 </td>
-                                <td class="text-end fw-semibold">৳ <?= number_format((float) $a['cost'], 2) ?></td>
+                                <td class="text-end fw-semibold">৳ <?= number_format((float) $a['rate'], 2) ?></td>
                             </tr>
                         <?php endforeach; ?>
                         <?php if (empty($project['activities'])): ?>
@@ -88,27 +92,6 @@
                         <?php endif; ?>
                     </tbody>
                 </table>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-4">
-        <div class="pd-card">
-            <h6 class="fw-semibold mb-4" style="color:var(--mz-text-muted);font-size:.75rem;text-transform:uppercase;letter-spacing:.5px;">Profit / Loss</h6>
-            <div class="d-flex justify-content-between mb-3">
-                <span class="text-muted">Total Cost</span>
-                <span>৳ <?= number_format((float) $project['total_cost'], 2) ?></span>
-            </div>
-            <div class="d-flex justify-content-between mb-3">
-                <span class="text-muted">Sale Amount</span>
-                <span style="color:#02a98f;">৳ <?= number_format((float) $project['sale_amount'], 2) ?></span>
-            </div>
-            <hr>
-            <div class="d-flex justify-content-between align-items-center">
-                <span class="fw-bold">Profit / Loss</span>
-                <span class="fw-bold" style="font-size:1.4rem;color:<?= ((float) $project['profit']) >= 0 ? '#02a98f' : '#FA896B' ?>;">
-                    ৳ <?= number_format((float) $project['profit'], 2) ?>
-                </span>
             </div>
         </div>
     </div>

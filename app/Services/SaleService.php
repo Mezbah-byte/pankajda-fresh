@@ -78,11 +78,13 @@ class SaleService extends BaseService
         }
 
         // Compute line items + subtotal
-        $subtotal = 0.0;
+        $subtotal     = 0.0;
+        $totalItemVat = 0.0;
         $items = [];
         foreach ($input['items'] as $row) {
             $qty   = (float) ($row['quantity'] ?? 0);
             $price = (float) ($row['unit_price'] ?? 0);
+            $vat   = (float) ($row['vat'] ?? 0);
             $total = round($qty * $price, 2);
             if ($qty <= 0 || $price < 0) {
                 throw new \InvalidArgumentException('Invalid line item quantity/price.');
@@ -92,13 +94,16 @@ class SaleService extends BaseService
                 'quantity'     => $qty,
                 'unit'         => $row['unit'] ?? 'kg',
                 'unit_price'   => $price,
+                'vat'          => $vat,
                 'total'        => $total,
             ];
-            $subtotal += $total;
+            $subtotal     += $total;
+            $totalItemVat += $vat;
         }
 
         $discount = (float) ($input['discount'] ?? 0);
-        $tax      = (float) ($input['tax'] ?? 0);
+        // Use sum of per-item VATs; fall back to manual tax if no per-item VAT entered
+        $tax      = $totalItemVat > 0 ? $totalItemVat : (float) ($input['tax'] ?? 0);
         $total    = round(max(0, $subtotal - $discount + $tax), 2);
 
         // For cash sales, paid defaults to total. For credit, paid defaults to whatever was provided.

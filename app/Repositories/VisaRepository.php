@@ -3,17 +3,20 @@
 namespace App\Repositories;
 
 use App\Models\VisaModel;
+use App\Models\VisaExtraCostModel;
 use App\Models\VisaPaymentModel;
 use Config\Database;
 
 class VisaRepository extends BaseRepository
 {
     private VisaPaymentModel $payments;
+    private VisaExtraCostModel $extraCosts;
 
     protected function bootModel(): void
     {
-        $this->model    = new VisaModel();
-        $this->payments = new VisaPaymentModel();
+        $this->model      = new VisaModel();
+        $this->payments   = new VisaPaymentModel();
+        $this->extraCosts = new VisaExtraCostModel();
     }
 
     public function search(array $filters, int $page = 1, int $perPage = 20): array
@@ -37,6 +40,9 @@ class VisaRepository extends BaseRepository
             if (! empty($filters['country'])) {
                 $builder->where('country', $filters['country']);
             }
+            if (! empty($filters['status'])) {
+                $builder->where('status', $filters['status']);
+            }
         });
     }
 
@@ -57,6 +63,39 @@ class VisaRepository extends BaseRepository
             ->where('deleted_at', null)
             ->orderBy('payment_date', 'DESC')
             ->findAll();
+    }
+
+    public function extraCostsFor(string $visaUnId): array
+    {
+        return $this->extraCosts->where('visa_un_id', $visaUnId)
+            ->where('deleted_at', null)
+            ->orderBy('id', 'ASC')
+            ->findAll();
+    }
+
+    public function addExtraCost(string $visaUnId, array $data): string
+    {
+        $data['visa_un_id'] = $visaUnId;
+        $id = $this->extraCosts->insert($data, true);
+        if ($id === false) {
+            throw new \RuntimeException('Failed to add extra cost.');
+        }
+        return $this->extraCosts->find($id)['un_id'];
+    }
+
+    public function deleteExtraCost(string $unId): bool
+    {
+        return $this->extraCosts->deleteByUnId($unId);
+    }
+
+    public function sumExtraCosts(string $visaUnId): float
+    {
+        $row = $this->extraCosts->builder()
+            ->selectSum('amount', 'total')
+            ->where('visa_un_id', $visaUnId)
+            ->where('deleted_at', null)
+            ->get()->getRowArray();
+        return (float) ($row['total'] ?? 0);
     }
 
     public function totalPaid(string $visaUnId): float

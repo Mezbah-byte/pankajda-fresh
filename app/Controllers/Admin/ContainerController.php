@@ -19,24 +19,17 @@ class ContainerController extends BaseController
 
     public function index()
     {
-        $page = max(1, (int) ($this->request->getGet('page') ?? 1));
         $filters = [
             'q'              => $this->request->getGet('q'),
             'status'         => $this->request->getGet('status'),
             'customs_status' => $this->request->getGet('customs_status'),
         ];
-        $result = $this->service->list($filters, $page, 15);
+        $grouped = $this->service->listGroupedByCompany($filters);
         return view('admin/containers/index', [
-            'title'      => 'Containers',
-            'containers' => $result['items'],
-            'pagination' => [
-                'page'      => $result['page'],
-                'per_page'  => $result['per_page'],
-                'total'     => $result['total'],
-                'last_page' => max(1, (int) ceil($result['total'] / max(1, $result['per_page']))),
-            ],
-            'filters'    => $filters,
-            'totals'     => $this->service->totals(),
+            'title'   => 'Containers',
+            'grouped' => $grouped,
+            'filters' => $filters,
+            'totals'  => $this->service->totals(),
         ]);
     }
 

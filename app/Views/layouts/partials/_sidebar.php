@@ -1,3 +1,8 @@
+<?php
+$_sf   = (new \App\Services\SettingService())->flat();
+$_name = $_sf['site.name']    ?? 'Pankaj Da ERP';
+$_sub  = $_sf['site.tagline'] ?? 'Business Management';
+?>
 <!-- Sidebar overlay (mobile tap to close) -->
 <div class="mz-overlay" id="mzOverlay" onclick="closeSidebar()"></div>
 
@@ -6,8 +11,8 @@
     <a href="<?= site_url('admin/dashboard') ?>" class="mz-brand">
         <div class="mz-brand-icon"><i class="bi bi-gem"></i></div>
         <div>
-            <div class="mz-brand-name">Pankaj Da ERP</div>
-            <div class="mz-brand-sub">Business Management</div>
+            <div class="mz-brand-name"><?= esc($_name) ?></div>
+            <div class="mz-brand-sub"><?= esc($_sub) ?></div>
         </div>
     </a>
 
@@ -21,11 +26,11 @@
         <a href="<?= site_url('admin/companies') ?>" class="<?= url_is('admin/companies*') ? 'active' : '' ?>">
             <i class="bi bi-buildings"></i><span>Companies</span>
         </a>
+        <a href="<?= site_url('admin/company-types') ?>" class="<?= url_is('admin/company-types*') ? 'active' : '' ?>" style="padding-left:2.5rem;font-size:.82rem;">
+            <i class="bi bi-tags"></i><span>Company Types</span>
+        </a>
         <a href="<?= site_url('admin/visas') ?>" class="<?= url_is('admin/visas*') ? 'active' : '' ?>">
             <i class="bi bi-passport"></i><span>Visas</span>
-        </a>
-        <a href="<?= site_url('admin/visas/pipeline') ?>" class="<?= url_is('admin/visas/pipeline*') ? 'active' : '' ?>" style="padding-left:2.5rem;font-size:.82rem;">
-            <i class="bi bi-kanban"></i><span>Pipeline</span>
         </a>
         <a href="<?= site_url('admin/containers') ?>" class="<?= url_is('admin/containers*') ? 'active' : '' ?>">
             <i class="bi bi-box-seam"></i><span>Containers</span>
@@ -38,6 +43,9 @@
         </a>
         <a href="<?= site_url('admin/vendors') ?>" class="<?= url_is('admin/vendors*') ? 'active' : '' ?>">
             <i class="bi bi-truck"></i><span>Vendors</span>
+        </a>
+        <a href="<?= site_url('admin/grv') ?>" class="<?= url_is('admin/grv*') ? 'active' : '' ?>">
+            <i class="bi bi-arrow-return-left"></i><span>GRV</span>
         </a>
         <a href="<?= site_url('admin/products') ?>" class="<?= url_is('admin/products*') ? 'active' : '' ?>">
             <i class="bi bi-tag"></i><span>Products</span>
@@ -82,6 +90,9 @@
         </a>
         <a href="<?= site_url('admin/settings') ?>" class="<?= url_is('admin/settings*') ? 'active' : '' ?>">
             <i class="bi bi-gear-fill"></i><span>Settings</span>
+        </a>
+        <a href="<?= site_url('admin/countries') ?>" class="<?= url_is('admin/countries*') ? 'active' : '' ?>" style="padding-left:2.5rem;font-size:.82rem;">
+            <i class="bi bi-globe"></i><span>Countries</span>
         </a>
         <a href="<?= site_url('admin/notifications') ?>" class="<?= url_is('admin/notifications*') ? 'active' : '' ?>">
             <i class="bi bi-bell"></i><span>Notifications</span>

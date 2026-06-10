@@ -30,12 +30,25 @@ class ProductService extends BaseService
     }
 
     /**
+     * Products supplied by a specific vendor.
+     */
+    public function forVendor(string $vendorUnId): array
+    {
+        return $this->products->getModel()
+            ->where('vendor_un_id', $vendorUnId)
+            ->where('deleted_at', null)
+            ->orderBy('product_name', 'ASC')
+            ->findAll();
+    }
+
+    /**
      * Create a new product.
      */
     public function create(array $input): array
     {
         $data = $this->normalize($input);
         $data['default_price'] = (float) ($data['default_price'] ?? 0);
+        $data['cost_price']    = (float) ($data['cost_price'] ?? 0);
         $data['status']        = $data['status'] ?? 'active';
 
         $unId = $this->transaction(fn () => $this->products->create($data));
@@ -60,6 +73,9 @@ class ProductService extends BaseService
         $data = $this->normalize($input);
         if (isset($data['default_price'])) {
             $data['default_price'] = (float) $data['default_price'];
+        }
+        if (isset($data['cost_price'])) {
+            $data['cost_price'] = (float) $data['cost_price'];
         }
 
         $this->transaction(fn () => $this->products->updateByUnId($unId, $data));
@@ -101,13 +117,17 @@ class ProductService extends BaseService
     }
 
     /**
-     * Whitelist allowed fields.
+     * Whitelist allowed fields. Maps sale_price → default_price for form compatibility.
      */
     private function normalize(array $input): array
     {
+        // Form sends 'sale_price'; map to DB column 'default_price'
+        if (isset($input['sale_price']) && !isset($input['default_price'])) {
+            $input['default_price'] = $input['sale_price'];
+        }
         $whitelisted = [
-            'company_un_id', 'product_name', 'product_code', 'category',
-            'unit', 'default_price', 'description', 'status',
+            'company_un_id', 'vendor_un_id', 'product_name', 'product_code', 'category',
+            'unit', 'default_price', 'cost_price', 'description', 'status',
         ];
         return array_intersect_key($input, array_flip($whitelisted));
     }
