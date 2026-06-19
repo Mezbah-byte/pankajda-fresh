@@ -53,6 +53,18 @@ class CustomerLedgerService extends BaseService
             ->get()
             ->getResultArray();
 
+        // Approved goods returns in period (credit notes)
+        $returns = $db->table('goods_return_vouchers')
+            ->where('customer_un_id', $customerUnId)
+            ->where('deleted_at', null)
+            ->where('status', 'approved')
+            ->where('grv_date >=', $from)
+            ->where('grv_date <=', $to)
+            ->orderBy('grv_date', 'ASC')
+            ->orderBy('id', 'ASC')
+            ->get()
+            ->getResultArray();
+
         // Build chronological transaction list
         $transactions = [];
 
@@ -77,6 +89,18 @@ class CustomerLedgerService extends BaseService
                 'debit'       => 0.0,
                 'credit'      => (float) ($p['amount'] ?? 0),
                 'description' => 'Payment via ' . ucfirst(str_replace('_', ' ', $p['payment_method'] ?? 'cash')),
+            ];
+        }
+
+        foreach ($returns as $r) {
+            $transactions[] = [
+                'date'        => $r['grv_date'],
+                'type'        => 'return',
+                'reference'   => $r['grv_no'] ?? '',
+                'un_id'       => $r['un_id'],
+                'debit'       => 0.0,
+                'credit'      => (float) ($r['total_amount'] ?? 0),
+                'description' => 'Goods returned — ' . ($r['grv_no'] ?? $r['un_id']),
             ];
         }
 

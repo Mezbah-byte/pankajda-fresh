@@ -230,6 +230,14 @@ $routes->group('admin', ['filter' => 'webAuth'], static function ($routes) {
     $routes->post('grv/(:segment)/approve',                   'Admin\GrvController::approve/$1');
     $routes->post('grv/(:segment)/delete',                    'Admin\GrvController::delete/$1');
 
+    // Purchases (vendor bills)
+    $routes->get('purchases',                                 'Admin\PurchaseController::index');
+    $routes->get('purchases/create',                          'Admin\PurchaseController::create');
+    $routes->post('purchases',                                'Admin\PurchaseController::store');
+    $routes->get('purchases/(:segment)',                      'Admin\PurchaseController::show/$1');
+    $routes->post('purchases/(:segment)/receive',             'Admin\PurchaseController::receive/$1');
+    $routes->post('purchases/(:segment)/delete',              'Admin\PurchaseController::delete/$1');
+
     // Activity Log
     $routes->get('activity-log',                              'Admin\ActivityLogController::index');
 

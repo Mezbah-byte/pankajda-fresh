@@ -120,18 +120,46 @@
     </div>
 </form>
 
+<datalist id="productList">
+    <?php foreach (($products ?? []) as $p): ?>
+        <option value="<?= esc($p['product_name']) ?>"></option>
+    <?php endforeach; ?>
+</datalist>
+
 <script>
+const PRODUCTS = <?= json_encode(array_map(fn($p) => [
+    'un_id' => $p['un_id'],
+    'name'  => $p['product_name'],
+    'unit'  => $p['unit'] ?? 'pcs',
+    'price' => (float) ($p['default_price'] ?? 0),
+], $products ?? []), JSON_UNESCAPED_UNICODE) ?>;
+
 function addItem() {
     const i = document.querySelectorAll('#itemsBody tr').length;
     const tr = document.createElement('tr');
     tr.innerHTML = `
-        <td><input type="text" class="form-control" name="items[${i}][product_name]" required></td>
+        <td>
+            <input type="hidden" class="prod-un-id" name="items[${i}][product_un_id]" value="">
+            <input type="text" class="form-control prod-name" list="productList" name="items[${i}][product_name]" autocomplete="off" required>
+        </td>
         <td><input type="number" step="0.001" min="0" class="form-control qty" name="items[${i}][quantity]" value="1" oninput="recalc()"></td>
-        <td><input type="text" class="form-control" name="items[${i}][unit]" value="kg"></td>
+        <td><input type="text" class="form-control unit" name="items[${i}][unit]" value="kg"></td>
         <td><input type="number" step="0.01" min="0" class="form-control price" name="items[${i}][unit_price]" value="0" oninput="recalc()"></td>
         <td><input type="number" step="0.01" min="0" class="form-control item-vat" name="items[${i}][vat]" value="0" oninput="recalc()"></td>
         <td class="text-end fw-semibold line-total">৳ 0.00</td>
         <td><button type="button" class="btn btn-sm btn-light text-danger" onclick="this.closest('tr').remove();recalc()"><i class="bi bi-x"></i></button></td>`;
+    // Catalog autofill: match product name → set un_id, unit, price
+    tr.querySelector('.prod-name').addEventListener('change', function () {
+        const m = PRODUCTS.find(p => p.name.toLowerCase() === this.value.toLowerCase());
+        if (m) {
+            tr.querySelector('.prod-un-id').value = m.un_id;
+            tr.querySelector('.unit').value       = m.unit;
+            if (m.price > 0) tr.querySelector('.price').value = m.price;
+        } else {
+            tr.querySelector('.prod-un-id').value = '';
+        }
+        recalc();
+    });
     document.getElementById('itemsBody').appendChild(tr);
     recalc();
 }

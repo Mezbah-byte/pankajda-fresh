@@ -61,11 +61,13 @@ class VendorController extends BaseController
         if (! $vendor) return redirect()->to('admin/vendors')->with('error', 'Vendor not found.');
         $payments = $this->service->payments($unId, 1, 20);
         $products = (new ProductService())->forVendor($unId);
+        $banks    = (new \App\Services\BankAccountService())->list([], 1, 100)['items'] ?? [];
         return view('admin/vendors/show', [
             'title'    => $vendor['vendor_name'],
             'vendor'   => $vendor,
             'payments' => $payments,
             'products' => $products,
+            'banks'    => $banks,
         ]);
     }
 

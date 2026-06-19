@@ -139,9 +139,10 @@ class GrvController extends BaseController
             $this->items->insert($item);
         }
 
-        // Auto stock-in if approved on creation
+        // Auto stock-in + customer credit if approved on creation
         if ($row['status'] === 'approved') {
             $this->applyStockIn($row['un_id'], $row['grv_no']);
+            $this->applyCustomerCredit($row);
         }
 
         return redirect()->to('admin/grv/' . $row['un_id'])->with('success', 'GRV ' . $row['grv_no'] . ' created.');
@@ -210,6 +211,8 @@ class GrvController extends BaseController
 
         if ($post['status'] === 'approved' && $grv['status'] !== 'approved') {
             $this->applyStockIn($unId, $grv['grv_no']);
+            $fresh = $this->model->where('un_id', $unId)->first();
+            if ($fresh) $this->applyCustomerCredit($fresh);
         }
 
         return redirect()->to('admin/grv/' . $unId)->with('success', 'GRV updated.');
@@ -251,8 +254,9 @@ class GrvController extends BaseController
 
         $this->model->update($grv['id'], ['status' => 'approved']);
         $this->applyStockIn($unId, $grv['grv_no']);
+        $this->applyCustomerCredit($grv);
 
-        return redirect()->to('admin/grv/' . $unId)->with('success', 'GRV approved and stock updated.');
+        return redirect()->to('admin/grv/' . $unId)->with('success', 'GRV approved — stock restocked and customer due credited.');
     }
 
     public function delete(string $unId)
@@ -271,6 +275,7 @@ class GrvController extends BaseController
         $units    = $post['item_unit'] ?? [];
         $qtys     = $post['item_quantity'] ?? [];
         $prices   = $post['item_unit_price'] ?? [];
+        $vats     = $post['item_vat'] ?? [];
         $reasons  = $post['item_reason'] ?? [];
 
         $items = [];
@@ -279,6 +284,7 @@ class GrvController extends BaseController
             if ($name === '') continue;
             $qty   = (float) ($qtys[$i] ?? 0);
             $price = (float) ($prices[$i] ?? 0);
+            $vat   = (float) ($vats[$i] ?? 0);
             if ($qty <= 0) continue;
 
             $items[] = [
@@ -287,8 +293,9 @@ class GrvController extends BaseController
                 'unit'          => $units[$i] ?? 'pcs',
                 'quantity'      => $qty,
                 'unit_price'    => $price,
+                'vat'           => $vat,
                 'reason'        => trim($reasons[$i] ?? ''),
-                '_line_total'   => $qty * $price,
+                '_line_total'   => $qty * $price + $vat,
             ];
         }
         return $items;
@@ -301,29 +308,34 @@ class GrvController extends BaseController
 
         try {
             $stockService = new StockService();
-            $db = Database::connect();
-
             foreach ($items as $item) {
                 if (! $item['product_un_id']) continue;
-
-                // Find stock item for this product
-                $stockItem = $db->table('stock_items')
-                    ->where('product_un_id', $item['product_un_id'])
-                    ->where('deleted_at', null)
-                    ->get()->getRowArray();
-
-                if ($stockItem) {
-                    $stockService->stockIn($stockItem['un_id'], [
-                        'quantity'  => $item['quantity'],
-                        'unit_cost' => $item['unit_price'],
-                        'reference' => $grvNo,
-                        'txn_date'  => date('Y-m-d'),
-                        'notes'     => 'GRV return: ' . $grvNo,
-                    ]);
-                }
+                // addForProduct auto-creates the stock item if the product has none
+                $stockService->addForProduct(
+                    $item['product_un_id'],
+                    (float) $item['quantity'],
+                    $grvNo,
+                    (float) $item['unit_price'],
+                    'GRV return: ' . $grvNo
+                );
             }
         } catch (\Throwable $e) {
             log_message('error', 'GRV stock-in failed for ' . $grvNo . ': ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Approved return reduces what the customer owes (credit note effect).
+     */
+    private function applyCustomerCredit(array $grv): void
+    {
+        $amount = (float) ($grv['total_amount'] ?? 0);
+        if ($amount <= 0 || empty($grv['customer_un_id'])) return;
+
+        try {
+            $this->customers->adjustDue($grv['customer_un_id'], -$amount);
+        } catch (\Throwable $e) {
+            log_message('error', 'GRV customer credit failed for ' . ($grv['grv_no'] ?? '?') . ': ' . $e->getMessage());
         }
     }
 

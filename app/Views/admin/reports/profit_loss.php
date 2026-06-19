@@ -35,9 +35,19 @@
             <table class="table align-middle" style="font-size:.9rem;">
                 <tbody>
                     <tr>
-                        <td class="text-muted py-3">Sales Revenue</td>
+                        <td class="text-muted py-3">Gross Sales</td>
+                        <td class="text-end py-3" style="font-size:1.1rem;font-weight:600;color:#02a98f;">+ ৳ <?= number_format($data['gross_sales'] ?? $data['sales'], 2) ?></td>
+                    </tr>
+                    <?php if (($data['returns'] ?? 0) > 0): ?>
+                    <tr>
+                        <td class="text-muted py-3">Goods Returns (GRV)</td>
+                        <td class="text-end py-3" style="font-size:1.1rem;font-weight:600;color:#FA896B;">− ৳ <?= number_format($data['returns'], 2) ?></td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted py-3">Net Sales Revenue</td>
                         <td class="text-end py-3" style="font-size:1.1rem;font-weight:600;color:#02a98f;">+ ৳ <?= number_format($data['sales'], 2) ?></td>
                     </tr>
+                    <?php endif; ?>
                     <tr>
                         <td class="text-muted py-3">Farm Project Profit</td>
                         <td class="text-end py-3" style="font-size:1.1rem;font-weight:600;color:<?= $data['farm_profit'] >= 0 ? '#02a98f' : '#FA896B' ?>;">

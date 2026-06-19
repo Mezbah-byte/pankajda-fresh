@@ -129,7 +129,18 @@ class ReportService extends BaseService
             ->where('sale_date >=', $from)
             ->where('sale_date <=', $to)
             ->get()->getRowArray();
-        $sales = (float) ($salesRow['total'] ?? 0);
+        $grossSales = (float) ($salesRow['total'] ?? 0);
+
+        // Approved goods returns reduce revenue
+        $returnsRow = $db->table('goods_return_vouchers')
+            ->selectSum('total_amount', 'total')
+            ->where('deleted_at', null)
+            ->where('status', 'approved')
+            ->where('grv_date >=', $from)
+            ->where('grv_date <=', $to)
+            ->get()->getRowArray();
+        $returns = (float) ($returnsRow['total'] ?? 0);
+        $sales   = $grossSales - $returns;
 
         $expRow = $db->table('expenses')
             ->selectSum('amount', 'total')
@@ -158,6 +169,8 @@ class ReportService extends BaseService
         return [
             'from'           => $from,
             'to'             => $to,
+            'gross_sales'    => $grossSales,
+            'returns'        => $returns,
             'sales'          => $sales,
             'expenses'       => $expenses,
             'container_cost' => $containerCost,

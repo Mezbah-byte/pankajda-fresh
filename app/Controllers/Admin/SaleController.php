@@ -55,6 +55,7 @@ class SaleController extends BaseController
             'next_invoice'  => $this->service->nextInvoiceNo(),
             'customers'     => $this->customers->search([], 1, 500)['items'],
             'companies'     => $this->companies->search([], 1, 100)['items'],
+            'products'      => (new \App\Services\ProductService())->forSelect(),
             'action'        => site_url('admin/sales'),
         ]);
     }

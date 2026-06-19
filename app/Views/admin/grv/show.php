@@ -126,6 +126,7 @@
                             <th>Unit</th>
                             <th class="text-end">Qty</th>
                             <th class="text-end">Unit Price</th>
+                            <th class="text-end">VAT</th>
                             <th class="text-end">Line Total</th>
                             <th>Reason</th>
                         </tr>
@@ -147,8 +148,9 @@
                             <td class="text-muted"><?= esc($item['unit']) ?></td>
                             <td class="text-end"><?= number_format((float)$item['quantity'], 3) ?></td>
                             <td class="text-end"><?= $cur ?> <?= number_format((float)$item['unit_price'], 2) ?></td>
+                            <td class="text-end text-muted"><?= $cur ?> <?= number_format((float)($item['vat'] ?? 0), 2) ?></td>
                             <td class="text-end fw-semibold">
-                                <?= $cur ?> <?= number_format((float)$item['quantity'] * (float)$item['unit_price'], 2) ?>
+                                <?= $cur ?> <?= number_format((float)$item['quantity'] * (float)$item['unit_price'] + (float)($item['vat'] ?? 0), 2) ?>
                             </td>
                             <td class="text-muted"><?= esc($item['reason'] ?: '—') ?></td>
                         </tr>
@@ -156,7 +158,7 @@
                     </tbody>
                     <tfoot>
                         <tr style="background:#f7f8fc;">
-                            <td colspan="5" class="text-end fw-bold">Total Return Amount</td>
+                            <td colspan="6" class="text-end fw-bold">Total Return Amount</td>
                             <td class="text-end fw-bold" style="font-size:1.05rem;color:#FA896B;">
                                 <?= $cur ?> <?= number_format((float)$grv['total_amount'], 2) ?>
                             </td>

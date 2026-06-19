@@ -53,6 +53,13 @@ class ProductService extends BaseService
 
         $unId = $this->transaction(fn () => $this->products->create($data));
 
+        // Every product gets a stock item so sales/GRV/purchases can move inventory
+        try {
+            (new StockService())->ensureItemForProduct($unId);
+        } catch (\Throwable $e) {
+            log_message('error', 'Stock item auto-create failed for product ' . $unId . ': ' . $e->getMessage());
+        }
+
         $this->audit('product.created', 'product', $unId, [
             'product_name' => $data['product_name'] ?? '',
             'category'     => $data['category'] ?? '',

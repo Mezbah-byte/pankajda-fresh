@@ -44,6 +44,9 @@ $_sub  = $_sf['site.tagline'] ?? 'Business Management';
         <a href="<?= site_url('admin/vendors') ?>" class="<?= url_is('admin/vendors*') ? 'active' : '' ?>">
             <i class="bi bi-truck"></i><span>Vendors</span>
         </a>
+        <a href="<?= site_url('admin/purchases') ?>" class="<?= url_is('admin/purchases*') ? 'active' : '' ?>">
+            <i class="bi bi-cart-plus"></i><span>Purchases</span>
+        </a>
         <a href="<?= site_url('admin/grv') ?>" class="<?= url_is('admin/grv*') ? 'active' : '' ?>">
             <i class="bi bi-arrow-return-left"></i><span>GRV</span>
         </a>

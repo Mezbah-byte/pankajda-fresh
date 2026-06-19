@@ -90,12 +90,13 @@ class SaleService extends BaseService
                 throw new \InvalidArgumentException('Invalid line item quantity/price.');
             }
             $items[] = [
-                'product_name' => $row['product_name'] ?? 'Item',
-                'quantity'     => $qty,
-                'unit'         => $row['unit'] ?? 'kg',
-                'unit_price'   => $price,
-                'vat'          => $vat,
-                'total'        => $total,
+                'product_un_id' => ($row['product_un_id'] ?? '') !== '' ? $row['product_un_id'] : null,
+                'product_name'  => $row['product_name'] ?? 'Item',
+                'quantity'      => $qty,
+                'unit'          => $row['unit'] ?? 'kg',
+                'unit_price'    => $price,
+                'vat'           => $vat,
+                'total'         => $total,
             ];
             $subtotal     += $total;
             $totalItemVat += $vat;
@@ -134,6 +135,19 @@ class SaleService extends BaseService
             ]);
 
             $this->sales->insertItems($saleUnId, $items);
+
+            // Deduct stock for catalog-linked items
+            $stock = new StockService();
+            foreach ($items as $item) {
+                if (! empty($item['product_un_id'])) {
+                    $stock->deductForProduct(
+                        $item['product_un_id'],
+                        (float) $item['quantity'],
+                        $invoiceNo,
+                        'Sale: ' . $invoiceNo
+                    );
+                }
+            }
 
             // Record initial payment if any
             if ($paid > 0) {
@@ -220,11 +234,25 @@ class SaleService extends BaseService
     {
         $sale = $this->sales->findByUnId($unId);
         if (! $sale) throw new \InvalidArgumentException('Sale not found.');
-        $this->transaction(function () use ($unId, $sale) {
+        $items = $this->sales->itemsFor($unId);
+        $this->transaction(function () use ($unId, $sale, $items) {
             $this->sales->deleteByUnId($unId);
             // Roll back the customer's due by the outstanding amount
             if ($sale['customer_un_id'] && (float) $sale['due_amount'] > 0) {
                 $this->customers->adjustDue($sale['customer_un_id'], -(float) $sale['due_amount']);
+            }
+            // Return deducted stock for catalog-linked items
+            $stock = new StockService();
+            foreach ($items as $item) {
+                if (! empty($item['product_un_id'])) {
+                    $stock->addForProduct(
+                        $item['product_un_id'],
+                        (float) $item['quantity'],
+                        $sale['invoice_no'] ?? $unId,
+                        null,
+                        'Sale deleted: ' . ($sale['invoice_no'] ?? $unId)
+                    );
+                }
             }
             $this->audit('sale.deleted', 'sale', $unId);
         });

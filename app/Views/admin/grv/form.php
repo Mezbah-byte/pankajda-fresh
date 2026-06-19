@@ -101,6 +101,7 @@
                         <th style="min-width:100px;">Unit</th>
                         <th style="min-width:90px;">Qty <span class="text-danger">*</span></th>
                         <th style="min-width:110px;">Unit Price</th>
+                        <th style="min-width:90px;">VAT</th>
                         <th style="min-width:110px;" class="text-end">Line Total</th>
                         <th style="min-width:150px;">Reason</th>
                         <th style="width:44px;"></th>
@@ -111,7 +112,7 @@
                 </tbody>
                 <tfoot>
                     <tr style="background:#f7f8fc;">
-                        <td colspan="4" class="text-end fw-semibold">Total Return Amount:</td>
+                        <td colspan="5" class="text-end fw-semibold">Total Return Amount:</td>
                         <td class="text-end fw-bold" style="color:#FA896B;font-size:1rem;" id="grandTotal"><?= $cur ?> 0.00</td>
                         <td colspan="2"></td>
                     </tr>
@@ -148,6 +149,7 @@ const EXISTING_ITEMS = <?= json_encode(array_map(fn($i) => [
     'unit'          => $i['unit'],
     'quantity'      => (float) $i['quantity'],
     'unit_price'    => (float) $i['unit_price'],
+    'vat'           => (float) ($i['vat'] ?? 0),
     'reason'        => $i['reason'] ?? '',
 ], $grv_items ?? []), JSON_UNESCAPED_UNICODE) ?>;
 
@@ -188,6 +190,11 @@ function addRow(data = {}) {
                    name="item_unit_price[]" min="0" step="0.01"
                    value="${data.unit_price||0}" style="width:100px;">
         </td>
+        <td>
+            <input type="number" class="form-control form-control-sm fld-vat"
+                   name="item_vat[]" min="0" step="0.01"
+                   value="${data.vat||0}" style="width:80px;">
+        </td>
         <td class="text-end fld-total fw-semibold" style="white-space:nowrap;">${CUR_SYMBOL} 0.00</td>
         <td>
             <input type="text" class="form-control form-control-sm"
@@ -216,7 +223,7 @@ function addRow(data = {}) {
         recalcTotal();
     });
 
-    ['fld-qty', 'fld-price'].forEach(cls => {
+    ['fld-qty', 'fld-price', 'fld-vat'].forEach(cls => {
         tr.querySelector('.' + cls).addEventListener('input', function () {
             recalcRow(tr);
             recalcTotal();
@@ -238,7 +245,8 @@ function addRow(data = {}) {
 function recalcRow(tr) {
     const qty   = parseFloat(tr.querySelector('.fld-qty').value)   || 0;
     const price = parseFloat(tr.querySelector('.fld-price').value) || 0;
-    const total = qty * price;
+    const vat   = parseFloat(tr.querySelector('.fld-vat').value)   || 0;
+    const total = qty * price + vat;
     tr.querySelector('.fld-total').textContent = CUR_SYMBOL + ' ' + total.toFixed(2);
 }
 
@@ -247,7 +255,8 @@ function recalcTotal() {
     document.querySelectorAll('#itemsBody tr').forEach(tr => {
         const qty   = parseFloat(tr.querySelector('.fld-qty')?.value)   || 0;
         const price = parseFloat(tr.querySelector('.fld-price')?.value) || 0;
-        sum += qty * price;
+        const vat   = parseFloat(tr.querySelector('.fld-vat')?.value)   || 0;
+        sum += qty * price + vat;
     });
     document.getElementById('grandTotal').textContent = CUR_SYMBOL + ' ' + sum.toFixed(2);
     const rows = document.querySelectorAll('#itemsBody tr').length;

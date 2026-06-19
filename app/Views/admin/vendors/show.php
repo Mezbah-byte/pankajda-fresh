@@ -117,6 +117,16 @@
                                name="reference_no" placeholder="Reference No">
                     </div>
                     <div class="col-12">
+                        <select class="form-select form-select-sm" name="bank_account_un_id">
+                            <option value="">Pay from: Cash / none</option>
+                            <?php foreach (($banks ?? []) as $b): ?>
+                                <option value="<?= esc($b['un_id']) ?>">
+                                    <?= esc($b['account_name']) ?><?= $b['bank_name'] ? ' — ' . esc($b['bank_name']) : '' ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="col-12">
                         <input type="text" class="form-control form-control-sm"
                                name="notes" placeholder="Notes (optional)">
                     </div>
