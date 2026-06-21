@@ -217,7 +217,7 @@
                         <?php else: ?>
                             <?php foreach ($recent_employees as $e): ?>
                                 <tr>
-                                    <td><a href="<?= site_url('admin/employees/' . $e['un_id']) ?>" class="text-decoration-none fw-semibold" style="color:var(--mz-primary);"><?= esc($e['full_name']) ?></a></td>
+                                    <td><a href="<?= site_url('admin/employees/' . $e['un_id']) ?>" class="text-decoration-none fw-semibold" style="color:var(--mz-primary);"><?= esc($e['name'] ?? '-') ?></a></td>
                                     <td><?= esc($e['department'] ?? '-') ?></td>
                                     <td><?= esc($e['designation'] ?? '-') ?></td>
                                     <td><?= esc($e['phone'] ?? '-') ?></td>
