@@ -293,7 +293,7 @@ $extraCostsTotal = (float)($visa['extra_costs'] ?? 0);
             <h6 class="fw-semibold mb-3 text-uppercase" style="color:var(--mz-text-muted);font-size:.72rem;letter-spacing:.5px;">Financial Summary</h6>
 
             <div class="d-flex justify-content-between py-2 border-bottom">
-                <span class="text-muted"><i class="bi bi-arrow-up-circle me-1 text-danger"></i>Purchase Price</span>
+                <span class="text-muted"><i class="bi bi-arrow-up-circle me-1 text-danger"></i>Visa Cost</span>
                 <span class="fw-semibold">৳ <?= number_format($purchasePrice, 2) ?></span>
             </div>
             <div class="d-flex justify-content-between py-2 border-bottom">
@@ -318,7 +318,7 @@ $extraCostsTotal = (float)($visa['extra_costs'] ?? 0);
         <div class="pd-card mb-3">
             <h6 class="fw-semibold mb-3 text-uppercase" style="color:var(--mz-text-muted);font-size:.72rem;letter-spacing:.5px;">Client Payment</h6>
             <div class="d-flex justify-content-between mb-2">
-                <span class="text-muted">Visa Cost</span>
+                <span class="text-muted">Customer Payment</span>
                 <span class="fw-semibold">৳ <?= number_format((float) $visa['visa_cost'], 2) ?></span>
             </div>
             <div class="d-flex justify-content-between mb-2">

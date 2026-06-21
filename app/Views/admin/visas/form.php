@@ -124,7 +124,7 @@
         </h6>
         <div class="row g-3">
             <div class="col-md-3">
-                <label class="form-label fw-semibold">Purchase Price (৳) <small class="text-muted">Cost to us</small></label>
+                <label class="form-label fw-semibold">Visa Cost (৳) <small class="text-muted">Cost to us</small></label>
                 <input type="number" step="0.01" min="0" class="form-control" name="purchase_price" id="purchase_price" value="<?= esc(old('purchase_price', $visa['purchase_price'] ?? 0)) ?>" oninput="calcProfit()">
             </div>
             <div class="col-md-3">
@@ -132,7 +132,7 @@
                 <input type="number" step="0.01" min="0" class="form-control" name="selling_price" id="selling_price" value="<?= esc(old('selling_price', $visa['selling_price'] ?? 0)) ?>" oninput="calcProfit()">
             </div>
             <div class="col-md-3">
-                <label class="form-label fw-semibold">Visa Cost (৳) <small class="text-muted">Charged to client</small></label>
+                <label class="form-label fw-semibold">Visa Customer Payment (৳) <small class="text-muted">Charged to client</small></label>
                 <input type="number" step="0.01" min="0" class="form-control" name="visa_cost" value="<?= esc(old('visa_cost', $visa['visa_cost'] ?? 0)) ?>">
             </div>
             <div class="col-md-3">
@@ -147,7 +147,7 @@
                     <small class="text-muted d-block">Estimated Profit</small>
                     <span class="fw-bold fs-5" id="profit_display" style="color:var(--mz-success,#198754);">৳ 0.00</span>
                 </div>
-                <small class="text-muted ms-2">(Selling Price − Purchase Price − Extra Costs)</small>
+                <small class="text-muted ms-2">(Selling Price − Visa Cost − Extra Costs)</small>
             </div>
         </div>
     </div>
